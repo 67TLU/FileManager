@@ -1,0 +1,46 @@
+{
+  "name": "filemanager",
+  "version": "1.0.0",
+  "description": "Với quy mô công ty vừa, mình nghĩ bạn nên thiết kế hệ thống này theo hướng **Company Resource Management System (CRMS)** – một nền tảng quản lý, lưu trữ, chia sẻ và kiểm soát quyền truy cập tài nguyên nội bộ của công ty.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/server.js",
+    "db:codegen": "kysely-codegen --out-file src/db/types.tsx",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "file-type": "^22.3.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "kysely": "^0.29.9",
+    "morgan": "^1.12.1",
+    "multer": "^2.5.0",
+    "nodemailer": "^10.6.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "kysely-codegen": "^0.20.0",
+    "node-pg-migrate": "^9.0.0",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

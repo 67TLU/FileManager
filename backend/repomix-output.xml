@@ -1,0 +1,5263 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+migrations/
+  1794817184617_001-extensions.js
+src/
+  config/
+    database.ts
+    env.ts
+  db/
+    types.ts
+    types.tsx
+  modules/
+    audit/
+      audit.controller.ts
+    auth/
+      auth.controller.ts
+      auth.service.ts
+    dashboard/
+      dashboard.controller.ts
+      dashboard.service.ts
+    departments/
+      department.controller.ts
+      department.service.ts
+    folders/
+      folder.controller.ts
+      folder.service.ts
+    health/
+      health.controller.ts
+    invitations/
+      invitation.controller.ts
+      invitation.service.ts
+    positions/
+      position.controller.ts
+      position.service.ts
+    resources/
+      resource.controller.ts
+      resource.service.ts
+    roles/
+      roles.controller.ts
+    search/
+      search.controller.ts
+      search.service.ts
+    system-settings/
+      settings.controller.ts
+      settings.service.ts
+    users/
+      me.controller.ts
+      user.controller.ts
+      user.service.ts
+  shared/
+    middlewares/
+      auth.middleware.ts
+      error.middleware.ts
+      rateLimit.middleware.ts
+      validate.middleware.ts
+    services/
+      email.service.ts
+    storage/
+      local.driver.ts
+      storage.factory.ts
+      storage.interface.ts
+    utils/
+      fileValidator.ts
+      permission.ts
+  app.ts
+  server.ts
+package.json
+tsc_output.txt
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="migrations/1794817184617_001-extensions.js">
+/**
+ * @type {import('node-pg-migrate').ColumnDefinitions | undefined}
+ */
+export const shorthands = undefined;
+
+/**
+ * @param pgm {import('node-pg-migrate').MigrationBuilder}
+ * @param run {() => void | undefined}
+ * @returns {Promise<void> | void}
+ */
+export const up = (pgm) => {};
+
+/**
+ * @param pgm {import('node-pg-migrate').MigrationBuilder}
+ * @param run {() => void | undefined}
+ * @returns {Promise<void> | void}
+ */
+export const down = (pgm) => {};
+</file>
+
+<file path="src/config/database.ts">
+import { Kysely, PostgresDialect } from 'kysely';
+import { Pool } from 'pg';
+import {env} from './env.js';
+
+
+// TODO: Sau khi chạy `npx kysely-codegen`, import DB ở đây
+import type { DB } from '../db/types.js';
+
+const dialect = new PostgresDialect({
+  pool: new Pool({
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    user: env.DB_USER,
+    password: env.DB_PASSWORD,
+    database: env.DB_NAME,
+    max: 20,
+  }),
+});
+
+export const db = new Kysely<DB>({ // Đã thay 'any' bằng 'DB'
+  dialect,
+});
+</file>
+
+<file path="src/config/env.ts">
+import 'dotenv/config';
+import { z } from 'zod';
+
+const envSchema = z.object({
+  PORT: z.string().default('3000'),
+  NODE_ENV: z.enum(['development', 'production']).default('development'),
+  DB_HOST: z.string(),
+  DB_PORT: z.string().transform(Number),
+  DB_USER: z.string(),
+  DB_PASSWORD: z.string(),
+  DB_NAME: z.string(),
+  JWT_ACCESS_SECRET: z.string(),
+  JWT_REFRESH_SECRET: z.string(),
+  JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  FRONTEND_URL: z.string().default('http://localhost:3000'),
+  STORAGE_DRIVER: z.enum(['local', 's3', 'r2']).default('local'),
+  STORAGE_LOCAL_PATH: z.string().default('./uploads'),
+  STORAGE_PUBLIC_URL: z.string().default('/files'),
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z.string().transform(Number).default(587),
+  SMTP_USER: z.string().default(""),
+  SMTP_PASS: z.string().default(""),
+});
+
+export const env = envSchema.parse(process.env);
+</file>
+
+<file path="src/db/types.ts">
+/**
+ * This file was generated by kysely-codegen.
+ * Please do not edit it manually.
+ */
+
+import type { ColumnType } from "kysely";
+
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
+
+export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+
+export type Json = JsonValue;
+
+export type JsonArray = JsonValue[];
+
+export type JsonObject = {
+  [x: string]: JsonValue | undefined;
+};
+
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
+
+export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+
+export interface AuditLogs {
+  action: string;
+  actor_id: string | null;
+  id: Generated<Int8>;
+  ip: string | null;
+  metadata: Generated<Json>;
+  occurred_at: Generated<Timestamp>;
+  request_id: string | null;
+  target_id: string | null;
+  target_type: string | null;
+}
+
+export interface DepartmentMembers {
+  department_id: string;
+  is_manager: Generated<boolean>;
+  joined_at: Generated<Timestamp>;
+  user_id: string;
+}
+
+export interface Departments {
+  code: string;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  id: Generated<string>;
+  manager_user_id: string | null;
+  name: string;
+  parent_id: string | null;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface Folders {
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  deleted_at: Timestamp | null;
+  depth: Generated<number>;
+  id: Generated<string>;
+  name: string;
+  parent_id: string | null;
+  path: string | null;
+  updated_at: Generated<Timestamp>;
+  workspace_id: string;
+}
+
+export interface Permissions {
+  code: string;
+  description: string;
+}
+
+export interface RefreshTokens {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  family_id: string;
+  id: Generated<string>;
+  ip: string | null;
+  replaced_by: string | null;
+  revoked_at: Timestamp | null;
+  token_hash: string;
+  user_agent: string | null;
+  user_id: string;
+}
+
+export interface Resources {
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  current_version_id: string | null;
+  deleted_at: Timestamp | null;
+  folder_id: string;
+  id: Generated<string>;
+  mime_type: string | null;
+  name: string;
+  size_bytes: Generated<Int8>;
+  status: Generated<string>;
+  trashed_at: Timestamp | null;
+  type: Generated<string>;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface ResourceVersions {
+  checksum_sha256: string | null;
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  id: Generated<string>;
+  mime_type: string;
+  note: string | null;
+  original_name: string;
+  resource_id: string;
+  size_bytes: Int8;
+  storage_object_id: string;
+  version_number: number;
+}
+
+export interface RolePermissions {
+  permission_code: string;
+  role_id: string;
+}
+
+export interface Roles {
+  id: Generated<string>;
+  is_system: Generated<boolean>;
+  key: string;
+  name: string;
+}
+
+export interface StorageObjects {
+  bucket: string | null;
+  checksum_sha256: string | null;
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  deleted_at: Timestamp | null;
+  id: Generated<string>;
+  mime_type: Generated<string>;
+  object_key: string;
+  provider: Generated<string>;
+  size_bytes: Int8;
+  status: Generated<string>;
+}
+
+export interface StorageQuotas {
+  id: Generated<string>;
+  limit_bytes: Int8;
+  scope_id: string | null;
+  scope_type: string;
+  used_bytes: Generated<Int8>;
+}
+
+export interface UserRoles {
+  created_at: Generated<Timestamp>;
+  granted_by: string | null;
+  id: Generated<string>;
+  role_id: string;
+  scope_id: string | null;
+  scope_type: Generated<string>;
+  user_id: string;
+}
+
+export interface Users {
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  email: string;
+  email_verified_at: Timestamp | null;
+  failed_logins: Generated<number>;
+  full_name: string;
+  id: Generated<string>;
+  last_login_at: Timestamp | null;
+  locked_until: Timestamp | null;
+  password_hash: string | null;
+  status: Generated<string>;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface Workspaces {
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  deleted_at: Timestamp | null;
+  department_id: string | null;
+  id: Generated<string>;
+  name: string;
+  owner_user_id: string | null;
+  type: string;
+}
+
+export interface Invitations {
+  id: string;
+  email: string;
+  token_hash: string;
+  invited_by: string;
+  department_id: string | null;
+  position_id: string | null;
+  role_ids: string[];
+  status: string;
+  expires_at: Date;
+  accepted_at: Date | null;
+  accepted_by: string | null;
+  revoked_at: Date | null;
+  created_at: Generated<Timestamp>;
+}
+
+export interface PasswordResetTokens {
+  id: string;
+  user_id: string;
+  token_hash: string;
+  expires_at: Date;
+  used_at: Date | null;
+  ip: string | null;
+  user_agent: string | null;
+  created_at: Generated<Timestamp>;
+}
+
+export interface DB {
+  audit_logs: AuditLogs;
+  department_members: DepartmentMembers;
+  departments: Departments;
+  folders: Folders;
+  invitations: Invitations;
+  password_reset_tokens: PasswordResetTokens;
+  permissions: Permissions;
+  refresh_tokens: RefreshTokens;
+  resource_versions: ResourceVersions;
+  resources: Resources;
+  role_permissions: RolePermissions;
+  roles: Roles;
+  storage_objects: StorageObjects;
+  storage_quotas: StorageQuotas;
+  user_roles: UserRoles;
+  users: Users;
+  workspaces: Workspaces;
+}
+</file>
+
+<file path="src/db/types.tsx">
+/**
+ * This file was generated by kysely-codegen.
+ * Please do not edit it manually.
+ */
+
+import type { ColumnType } from "kysely";
+
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
+
+export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+
+export type Json = JsonValue;
+
+export type JsonArray = JsonValue[];
+
+export type JsonObject = {
+  [x: string]: JsonValue | undefined;
+};
+
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
+
+export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+
+export interface AuditLogs {
+  action: string;
+  actor_id: string | null;
+  id: Generated<Int8>;
+  ip: string | null;
+  metadata: Generated<Json>;
+  occurred_at: Generated<Timestamp>;
+  request_id: string | null;
+  target_id: string | null;
+  target_type: string | null;
+}
+
+export interface DepartmentMembers {
+  department_id: string;
+  is_manager: Generated<boolean>;
+  joined_at: Generated<Timestamp>;
+  user_id: string;
+}
+
+export interface Departments {
+  code: string;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  id: Generated<string>;
+  manager_user_id: string | null;
+  name: string;
+  parent_id: string | null;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface Folders {
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  deleted_at: Timestamp | null;
+  depth: Generated<number>;
+  id: Generated<string>;
+  name: string;
+  parent_id: string | null;
+  path: string | null;
+  updated_at: Generated<Timestamp>;
+  workspace_id: string;
+}
+
+export interface Permissions {
+  code: string;
+  description: string;
+}
+
+export interface RefreshTokens {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  family_id: string;
+  id: Generated<string>;
+  ip: string | null;
+  replaced_by: string | null;
+  revoked_at: Timestamp | null;
+  token_hash: string;
+  user_agent: string | null;
+  user_id: string;
+}
+
+export interface Resources {
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  current_version_id: string | null;
+  deleted_at: Timestamp | null;
+  folder_id: string;
+  id: Generated<string>;
+  mime_type: string | null;
+  name: string;
+  size_bytes: Generated<Int8>;
+  status: Generated<string>;
+  trashed_at: Timestamp | null;
+  type: Generated<string>;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface ResourceVersions {
+  checksum_sha256: string | null;
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  id: Generated<string>;
+  mime_type: string;
+  note: string | null;
+  original_name: string;
+  resource_id: string;
+  size_bytes: Int8;
+  storage_object_id: string;
+  version_number: number;
+}
+
+export interface RolePermissions {
+  permission_code: string;
+  role_id: string;
+}
+
+export interface Roles {
+  id: Generated<string>;
+  is_system: Generated<boolean>;
+  key: string;
+  name: string;
+}
+
+export interface StorageObjects {
+  bucket: string | null;
+  checksum_sha256: string | null;
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  deleted_at: Timestamp | null;
+  id: Generated<string>;
+  mime_type: Generated<string>;
+  object_key: string;
+  provider: Generated<string>;
+  size_bytes: Int8;
+  status: Generated<string>;
+}
+
+export interface StorageQuotas {
+  id: Generated<string>;
+  limit_bytes: Int8;
+  scope_id: string | null;
+  scope_type: string;
+  used_bytes: Generated<Int8>;
+}
+
+export interface UserRoles {
+  created_at: Generated<Timestamp>;
+  granted_by: string | null;
+  id: Generated<string>;
+  role_id: string;
+  scope_id: string | null;
+  scope_type: Generated<string>;
+  user_id: string;
+}
+
+export interface Users {
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  email: string;
+  email_verified_at: Timestamp | null;
+  failed_logins: Generated<number>;
+  full_name: string;
+  id: Generated<string>;
+  last_login_at: Timestamp | null;
+  locked_until: Timestamp | null;
+  password_hash: string | null;
+  status: Generated<string>;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface Workspaces {
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  deleted_at: Timestamp | null;
+  department_id: string | null;
+  id: Generated<string>;
+  name: string;
+  owner_user_id: string | null;
+  type: string;
+}
+
+export interface DB {
+  audit_logs: AuditLogs;
+  department_members: DepartmentMembers;
+  departments: Departments;
+  folders: Folders;
+  permissions: Permissions;
+  refresh_tokens: RefreshTokens;
+  resource_versions: ResourceVersions;
+  resources: Resources;
+  role_permissions: RolePermissions;
+  roles: Roles;
+  storage_objects: StorageObjects;
+  storage_quotas: StorageQuotas;
+  user_roles: UserRoles;
+  users: Users;
+  workspaces: Workspaces;
+}
+</file>
+
+<file path="src/modules/audit/audit.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { z } from 'zod';
+import { db } from '../../config/database.js';
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import { requireFunctionalPermission } from '../../shared/utils/permission.js';
+import { validate } from '../../shared/middlewares/validate.middleware.js';
+
+const listAuditLogsSchema = z.object({
+  query: z.object({
+    page: z.string().transform(Number).optional().default(1),
+    limit: z.string().transform(Number).optional().default(50),
+    action: z.string().optional(),
+    actorId: z.string().uuid().optional(),
+    targetType: z.string().optional(),
+    dateFrom: z.string().datetime().optional(),
+    dateTo: z.string().datetime().optional(),
+  }),
+});
+
+export class AuditController {
+    exportCsv = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'audit.export');
+        const { action, actorId, targetType, dateFrom, dateTo } = req.query as any;
+
+        let q = db.selectFrom('audit_logs')
+          .leftJoin('users', 'users.id', 'audit_logs.actor_id')
+          .select([
+            'audit_logs.id', 'audit_logs.occurred_at', 'audit_logs.action',
+            'audit_logs.target_type', 'audit_logs.target_id', 'audit_logs.ip',
+            'audit_logs.metadata', 'users.email as actor_email',
+          ])
+          .orderBy('audit_logs.occurred_at', 'desc')
+          .limit(10000);
+
+        if (action) q = q.where('audit_logs.action', '=', action);
+        if (actorId) q = q.where('audit_logs.actor_id', '=', actorId);
+        if (targetType) q = q.where('audit_logs.target_type', '=', targetType);
+        if (dateFrom) q = q.where('audit_logs.occurred_at', '>=', new Date(dateFrom));
+        if (dateTo) q = q.where('audit_logs.occurred_at', '<=', new Date(dateTo));
+
+        const rows = await q.execute();
+        const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const header = ['id', 'occurred_at', 'actor_email', 'action', 'target_type', 'target_id', 'ip', 'metadata'];
+        const csv = [
+          header.join(','),
+          ...rows.map((r) => [
+            r.id, new Date(r.occurred_at as any).toISOString(), r.actor_email,
+            r.action, r.target_type, r.target_id, r.ip, JSON.stringify(r.metadata),
+          ].map(esc).join(',')),
+        ].join('\r\n');
+
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="audit-logs-${Date.now()}.csv"`);
+        res.send('\uFEFF' + csv); // BOM cho Excel tiếng Việt
+      } catch (e) { next(e); }
+    },
+  ];
+  list = [
+    validate(listAuditLogsSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'audit.view');
+
+        const { page, limit, action, actorId, targetType, dateFrom, dateTo } = req.query as any;
+        const offset = ((page || 1) - 1) * (limit || 50);
+
+        let query = db.selectFrom('audit_logs')
+          .leftJoin('users', 'users.id', 'audit_logs.actor_id')
+          .select([
+            'audit_logs.id',
+            'audit_logs.action',
+            'audit_logs.occurred_at',
+            'audit_logs.target_type',
+            'audit_logs.target_id',
+            'audit_logs.ip',
+            'audit_logs.metadata',
+            'users.full_name as actor_name',
+            'users.email as actor_email',
+          ])
+          .orderBy('audit_logs.occurred_at', 'desc');
+
+        if (action) query = query.where('audit_logs.action', '=', action);
+        if (actorId) query = query.where('audit_logs.actor_id', '=', actorId);
+        if (targetType) query = query.where('audit_logs.target_type', '=', targetType);
+        if (dateFrom) query = query.where('audit_logs.occurred_at', '>=', dateFrom);
+        if (dateTo) query = query.where('audit_logs.occurred_at', '<=', dateTo);
+
+        const logs = await query.limit(limit || 50).offset(offset).execute();
+
+        const countResult = await db.selectFrom('audit_logs')
+          .select(db.fn.count<number>('id').as('total'))
+          .executeTakeFirstOrThrow();
+
+        res.json({
+          success: true,
+          data: logs,
+          pagination: {
+            page: page || 1,
+            limit: limit || 50,
+            total: Number(countResult.total),
+            totalPages: Math.ceil(Number(countResult.total) / (limit || 50)),
+          },
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/auth/auth.controller.ts">
+import type { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
+import {AuthService} from './auth.service.js';
+
+import {validate} from '../../shared/middlewares/validate.middleware.js';
+
+import type {AuthRequest} from '../../shared/middlewares/auth.middleware.js';
+
+import {authenticate} from '../../shared/middlewares/auth.middleware.js';
+
+import {forgotPasswordLimiter} from '../../shared/middlewares/rateLimit.middleware.js';
+
+import {AppError} from '../../shared/middlewares/error.middleware.js';
+
+
+const loginSchema = z.object({
+  body: z.object({
+    email: z.string().email('Email không hợp lệ'),
+    password: z.string().min(6, 'Mật khẩu ít nhất 6 ký tự'),
+  }),
+});
+
+const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email('Email không hợp lệ'),
+  }),
+});
+
+const resetPasswordSchema = z.object({
+  body: z.object({
+    token: z.string().min(1),
+    newPassword: z.string().min(6, 'Mật khẩu ít nhất 6 ký tự'),
+  }),
+});
+
+const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(6, 'Mật khẩu ít nhất 6 ký tự'),
+  }),
+});
+
+export class AuthController {
+  private authService = new AuthService();
+
+  forgotPassword = [
+    forgotPasswordLimiter,
+    validate(forgotPasswordSchema),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { email } = req.body;
+        const result = await this.authService.forgotPassword(email, req.ip || '', req.get('user-agent') || '');
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  resetPassword = [
+    validate(resetPasswordSchema),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { token, newPassword } = req.body;
+        const result = await this.authService.resetPassword(token, newPassword, req.ip || '');
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  changePassword = [
+    authenticate,
+    validate(changePasswordSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { currentPassword, newPassword } = req.body;
+        const result = await this.authService.changePassword(req.user!.id, currentPassword, newPassword);
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  logoutAllDevices = [
+    authenticate,
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const result = await this.authService.logoutAllDevices(req.user!.id);
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+  login = [
+    validate(loginSchema),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { email, password } = req.body;
+        const result = await this.authService.login(email, password, req.ip || '');
+        res.status(200).json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  refreshToken = [
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+          throw new AppError(400, 'Thiếu refresh token');
+        }
+        const result = await this.authService.refreshToken(refreshToken, req.ip || '');
+        res.status(200).json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  logout = [
+    authenticate,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+          throw new AppError(400, 'Thiếu refresh token');
+        }
+        await this.authService.logout(refreshToken);
+        res.json({ success: true, message: 'Đăng xuất thành công' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/auth/auth.service.ts">
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import {db} from '../../config/database.js';
+
+import {env} from '../../config/env.js';
+
+import {AppError} from '../../shared/middlewares/error.middleware.js';
+
+import { sql } from 'kysely';
+import {EmailService} from '../../shared/services/email.service.js';
+
+
+export class AuthService {
+  private emailService = new EmailService();
+  async forgotPassword(email: string, ipAddress: string, userAgent: string) {
+    // 1. Tìm user
+    const user = await db.selectFrom('users')
+      .select(['id', 'email', 'status'])
+      .where('email', '=', email)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!user) {
+      // Không throw lỗi để tránh leak thông tin email có tồn tại hay không
+      return { message: 'Nếu email tồn tại, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.' };
+    }
+
+    if (user.status !== 'active') {
+      return { message: 'Nếu email tồn tại, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.' };
+    }
+
+    // 2. Tạo token
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 giờ
+
+    // 3. Lưu token vào DB
+    await db.insertInto('password_reset_tokens' as any)
+      .values({
+        user_id: user.id,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+        ip: ipAddress,
+        user_agent: userAgent,
+      } as any)
+      .execute();
+
+    // 4. Gửi email
+    const resetLink = `${env.FRONTEND_URL}/reset-password?token=${token}`;
+    await this.emailService.sendPasswordResetEmail(user.email, resetLink);
+
+    // 5. Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        actor_id: user.id,
+        action: 'auth.forgot_password',
+        target_type: 'user',
+        target_id: user.id,
+        metadata: JSON.stringify({ ip: ipAddress }) as any,
+      })
+      .execute();
+
+    return { message: 'Nếu email tồn tại, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.' };
+  }
+
+  async resetPassword(token: string, newPassword: string, ipAddress: string) {
+    // 1. Hash token để tìm trong DB
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    const resetToken = await db.selectFrom('password_reset_tokens')
+      .select(['id', 'user_id', 'expires_at', 'used_at'])
+      .where('token_hash', '=', tokenHash)
+      .executeTakeFirst();
+
+    if (!resetToken) {
+      throw new AppError(400, 'Token không hợp lệ');
+    }
+
+    if (resetToken.used_at) {
+      throw new AppError(400, 'Token đã được sử dụng');
+    }
+
+    if (new Date(resetToken.expires_at) < new Date()) {
+      throw new AppError(400, 'Token đã hết hạn');
+    }
+
+    // 2. Update password
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    
+    await db.transaction().execute(async (trx) => {
+      // Update password
+      await trx.updateTable('users')
+        .set({ 
+          password_hash: passwordHash,
+          failed_logins: 0,
+          locked_until: null,
+        })
+        .where('id', '=', resetToken.user_id)
+        .execute();
+
+      // Revoke tất cả refresh tokens (buộc login lại)
+      await trx.updateTable('refresh_tokens')
+        .set({ revoked_at: new Date() })
+        .where('user_id', '=', resetToken.user_id)
+        .where('revoked_at', 'is', null)
+        .execute();
+
+      // Đánh dấu token đã sử dụng
+      await (trx as any).updateTable('password_reset_tokens')
+        .set({ used_at: new Date() })
+        .where('id', '=', resetToken.id)
+        .execute();
+
+      // Audit log
+      await trx.insertInto('audit_logs')
+        .values({
+          actor_id: resetToken.user_id,
+          action: 'auth.reset_password',
+          target_type: 'user',
+          target_id: resetToken.user_id,
+          metadata: JSON.stringify({ ip: ipAddress }) as any,
+        })
+        .execute();
+    });
+
+    return { message: 'Mật khẩu đã được đặt lại thành công. Vui lòng đăng nhập lại.' };
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    // 1. Lấy user
+    const user = await db.selectFrom('users')
+      .select(['id', 'password_hash'])
+      .where('id', '=', userId)
+      .executeTakeFirstOrThrow();
+
+    // 2. Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password_hash!);
+    if (!isMatch) {
+      throw new AppError(400, 'Mật khẩu hiện tại không đúng');
+    }
+
+    // 3. Update password
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    
+    await db.transaction().execute(async (trx) => {
+      await trx.updateTable('users')
+        .set({ password_hash: passwordHash })
+        .where('id', '=', userId)
+        .execute();
+
+      // Revoke tất cả refresh tokens trừ token hiện tại (optional)
+      await trx.updateTable('refresh_tokens')
+        .set({ revoked_at: new Date() })
+        .where('user_id', '=', userId)
+        .where('revoked_at', 'is', null)
+        .execute();
+
+      // Audit log
+      await trx.insertInto('audit_logs')
+        .values({
+          actor_id: userId,
+          action: 'auth.change_password',
+          target_type: 'user',
+          target_id: userId,
+        })
+        .execute();
+    });
+
+    return { message: 'Mật khẩu đã được thay đổi thành công' };
+  }
+
+  async logoutAllDevices(userId: string) {
+    await db.updateTable('refresh_tokens')
+      .set({ revoked_at: new Date() })
+      .where('user_id', '=', userId)
+      .where('revoked_at', 'is', null)
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        actor_id: userId,
+        action: 'auth.logout_all_devices',
+        target_type: 'user',
+        target_id: userId,
+      })
+      .execute();
+
+    return { message: 'Đã đăng xuất khỏi tất cả thiết bị' };
+  }
+  async login(email: string, password: string, ipAddress: string) {
+    // 1. Tìm user
+    const user = await db.selectFrom('users')
+      .select(['id', 'email', 'password_hash', 'full_name', 'status', 'failed_logins', 'locked_until'])
+      .where('email', '=', email)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!user || !user.password_hash) {
+      throw new AppError(401, 'Email hoặc mật khẩu không đúng');
+    }
+
+    // 2. Kiểm tra tài khoản có bị khóa không
+    if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      throw new AppError(423, `Tài khoản bị khóa đến ${user.locked_until}`);
+    }
+
+    if (user.status !== 'active') {
+      throw new AppError(403, 'Tài khoản chưa được kích hoạt hoặc đã bị khóa');
+    }
+
+    // 3. Kiểm tra password
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (!isMatch) {
+      // Tăng failed_logins
+      const maxFailed = 5;
+      const newFailedCount = (user.failed_logins || 0) + 1;
+      
+      await db.updateTable('users')
+        .set({
+          failed_logins: newFailedCount,
+          ...(newFailedCount >= maxFailed && {
+            locked_until: sql`now() + interval '15 minutes'`,
+          }),
+        })
+        .where('id', '=', user.id)
+        .execute();
+
+      if (newFailedCount >= maxFailed) {
+        throw new AppError(423, 'Tài khoản bị khóa 15 phút do đăng nhập sai quá nhiều lần');
+      }
+
+      throw new AppError(401, 'Email hoặc mật khẩu không đúng');
+    }
+
+    // 4. Reset failed_logins và tạo tokens
+    await db.updateTable('users')
+      .set({
+        failed_logins: 0,
+        locked_until: null,
+        last_login_at: new Date(),
+      })
+      .where('id', '=', user.id)
+      .execute();
+
+    const tokens = await this.generateTokens(user.id, user.email, ipAddress);
+
+    return {
+      user: { id: user.id, email: user.email, fullName: user.full_name },
+      ...tokens,
+    };
+  }
+
+  async refreshToken(refreshToken: string, ipAddress: string) {
+    // 1. Verify token
+    let decoded: any;
+    try {
+      decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET);
+    } catch (error) {
+      throw new AppError(401, 'Refresh token không hợp lệ hoặc đã hết hạn');
+    }
+
+    // 2. Tìm token trong DB
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const storedToken = await db.selectFrom('refresh_tokens')
+      .select(['id', 'user_id', 'token_hash', 'family_id', 'expires_at', 'revoked_at'])
+      .where('token_hash', '=', tokenHash)
+      .executeTakeFirst();
+
+    if (!storedToken) {
+      throw new AppError(401, 'Refresh token không tồn tại');
+    }
+
+    // 3. Kiểm tra đã bị revoke chưa
+    if (storedToken.revoked_at) {
+      // Token reuse detection: revoke toàn bộ family
+      await db.updateTable('refresh_tokens')
+        .set({ revoked_at: new Date() })
+        .where('family_id', '=', storedToken.family_id)
+        .where('revoked_at', 'is', null)
+        .execute();
+
+      throw new AppError(401, 'Refresh token đã bị sử dụng lại - nghi ngờ bị đánh cắp');
+    }
+
+    // 4. Kiểm tra hết hạn
+    if (new Date(storedToken.expires_at) < new Date()) {
+      throw new AppError(401, 'Refresh token đã hết hạn');
+    }
+
+    // 5. Revoke token cũ
+    await db.updateTable('refresh_tokens')
+      .set({ revoked_at: new Date() })
+      .where('id', '=', storedToken.id)
+      .execute();
+
+    // 6. Lấy thông tin user
+    const user = await db.selectFrom('users')
+      .select(['id', 'email', 'full_name'])
+      .where('id', '=', storedToken.user_id)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirstOrThrow();
+
+    // 7. Tạo token mới
+    const tokens = await this.generateTokens(user.id, user.email, ipAddress, storedToken.family_id);
+
+    return {
+      user: { id: user.id, email: user.email, fullName: user.full_name },
+      ...tokens,
+    };
+  }
+
+  private async generateTokens(userId: string, email: string, ipAddress: string, familyId?: string) {
+    const accessToken = jwt.sign(
+      { id: userId, email },
+      env.JWT_ACCESS_SECRET,
+      { expiresIn: env.JWT_ACCESS_EXPIRES_IN } as any
+    );
+
+    const refreshToken = jwt.sign(
+      { id: userId },
+      env.JWT_REFRESH_SECRET,
+      { expiresIn: env.JWT_REFRESH_EXPIRES_IN } as any
+    );
+
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const newFamilyId = familyId || crypto.randomUUID();
+
+    await db.insertInto('refresh_tokens')
+      .values({
+        id: crypto.randomUUID(),
+        user_id: userId,
+        token_hash: tokenHash,
+        family_id: newFamilyId,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        ip: ipAddress,
+      })
+      .execute();
+
+    return { accessToken, refreshToken };
+  }
+
+  async logout(refreshToken: string) {
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    
+    await db.updateTable('refresh_tokens')
+      .set({ revoked_at: new Date() })
+      .where('token_hash', '=', tokenHash)
+      .execute();
+  }
+}
+</file>
+
+<file path="src/modules/dashboard/dashboard.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { DashboardService } from './dashboard.service.js';
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+
+export class DashboardController {
+  private dashboardService = new DashboardService();
+
+  getStats = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const stats = await this.dashboardService.getStats(req.user!.id);
+        res.json({ success: true, data: stats });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  getRecentActivity = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const limit = req.query.limit ? Number(req.query.limit) : 10;
+        const activities = await this.dashboardService.getRecentActivity(req.user!.id, limit);
+        res.json({ success: true, data: activities });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  getStorageTrend = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const months = req.query.months ? Number(req.query.months) : 6;
+        const trend = await this.dashboardService.getStorageTrend(req.user!.id, months);
+        res.json({ success: true, data: trend });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/dashboard/dashboard.service.ts">
+import { db } from '../../config/database.js';
+import { sql } from 'kysely';
+
+export class DashboardService {
+  /**
+   * Lấy thống kê tổng quan cho user
+   */
+  async getStats(userId: string) {
+    // 1. Tổng số resources của user (created_by)
+    const totalFilesResult = await db.selectFrom('resources')
+      .select(db.fn.count<number>('id').as('count'))
+      .where('created_by', '=', userId)
+      .where('deleted_at', 'is', null)
+      .where('status', '=', 'active')
+      .executeTakeFirstOrThrow();
+
+    // 2. Tổng dung lượng user đã upload
+    const totalSizeResult = await db.selectFrom('resources')
+      .select(db.fn.sum<number>('size_bytes').as('total'))
+      .where('created_by', '=', userId)
+      .where('deleted_at', 'is', null)
+      .where('status', '=', 'active')
+      .executeTakeFirstOrThrow();
+
+    // 3. Số resources trong thùng rác
+    const trashCountResult = await db.selectFrom('resources')
+      .select(db.fn.count<number>('id').as('count'))
+      .where('created_by', '=', userId)
+      .where('status', '=', 'trashed')
+      .where('deleted_at', 'is', null)
+      .executeTakeFirstOrThrow();
+
+    // 4. Số lần download của user (từ audit_logs)
+    const downloadCountResult = await db.selectFrom('audit_logs')
+      .select(db.fn.count<number>('id').as('count'))
+      .where('actor_id', '=', userId)
+      .where('action', '=', 'resource.download')
+      .executeTakeFirstOrThrow();
+
+    // 5. Số lần upload của user
+    const uploadCountResult = await db.selectFrom('audit_logs')
+      .select(db.fn.count<number>('id').as('count'))
+      .where('actor_id', '=', userId)
+      .where('action', '=', 'resource.upload')
+      .executeTakeFirstOrThrow();
+
+    return {
+      totalFiles: Number(totalFilesResult.count),
+      totalSizeBytes: Number(totalSizeResult.total || 0),
+      trashCount: Number(trashCountResult.count),
+      downloadCount: Number(downloadCountResult.count),
+      uploadCount: Number(uploadCountResult.count),
+    };
+  }
+
+  /**
+   * Lấy hoạt động gần đây của user
+   */
+  async getRecentActivity(userId: string, limit: number = 10) {
+    const activities = await db.selectFrom('audit_logs')
+      .leftJoin('resources', 'resources.id', 'audit_logs.target_id')
+      .leftJoin('folders', 'folders.id', 'resources.folder_id')
+      .select([
+        'audit_logs.id',
+        'audit_logs.action',
+        'audit_logs.occurred_at',
+        'audit_logs.target_type',
+        'audit_logs.target_id',
+        'audit_logs.metadata',
+        'resources.name as resource_name',
+        'resources.mime_type',
+        'folders.name as folder_name',
+      ])
+      .where('audit_logs.actor_id', '=', userId)
+      .where('audit_logs.target_type', '=', 'resource')
+      .orderBy('audit_logs.occurred_at', 'desc')
+      .limit(limit)
+      .execute();
+
+    return activities.map(a => ({
+      id: a.id,
+      action: a.action,
+      occurredAt: a.occurred_at,
+      resource: a.resource_name ? {
+        id: a.target_id,
+        name: a.resource_name,
+        mimeType: a.mime_type,
+        folderName: a.folder_name,
+      } : null,
+      metadata: a.metadata,
+    }));
+  }
+
+  /**
+   * Lấy thống kê storage theo tháng (cho chart)
+   */
+  async getStorageTrend(userId: string, months: number = 6) {
+    const trend = await db.selectFrom('audit_logs')
+      .leftJoin('resources', 'resources.id', 'audit_logs.target_id')
+      .select([
+        sql`DATE_TRUNC('month', audit_logs.occurred_at)`.as('month'),
+        db.fn.sum<number>('resources.size_bytes').as('total_bytes'),
+        db.fn.count<number>('audit_logs.id').as('upload_count'),
+      ])
+      .where('audit_logs.actor_id', '=', userId)
+      .where('audit_logs.action', '=', 'resource.upload')
+      .where('audit_logs.occurred_at', '>=', sql`NOW() - INTERVAL '${months} months'` as any)
+      .groupBy(sql`DATE_TRUNC('month', audit_logs.occurred_at)`)
+      .orderBy('month', 'asc')
+      .execute();
+
+    return trend.map(t => ({
+      month: t.month,
+      totalBytes: Number(t.total_bytes || 0),
+      uploadCount: Number(t.upload_count),
+    }));
+  }
+}
+</file>
+
+<file path="src/modules/departments/department.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { z } from 'zod';
+import {DepartmentService} from './department.service.js';
+
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import {validate} from '../../shared/middlewares/validate.middleware.js';
+
+import {requireFunctionalPermission} from '../../shared/utils/permission.js';
+
+
+// ============================================================
+// VALIDATION SCHEMAS
+// ============================================================
+const createDepartmentSchema = z.object({
+  body: z.object({
+    code: z.string()
+      .min(2, 'Mã phòng ban ít nhất 2 ký tự')
+      .max(20, 'Mã phòng ban tối đa 20 ký tự')
+      .regex(/^[A-Z0-9_]+$/, 'Mã chỉ chứa chữ hoa, số và dấu _'),
+    name: z.string().min(1, 'Tên phòng ban không được để trống').max(100),
+    parentId: z.string().uuid().nullable().optional(),
+    managerUserId: z.string().uuid().nullable().optional(),
+  }),
+});
+
+const updateDepartmentSchema = z.object({
+  body: z.object({
+    name: z.string().min(1).max(100).optional(),
+    managerUserId: z.string().uuid().nullable().optional(),
+  }),
+});
+
+const addMemberSchema = z.object({
+  body: z.object({
+    userId: z.string().uuid('User ID không hợp lệ'),
+    isManager: z.boolean().optional().default(false),
+  }),
+});
+
+// ============================================================
+// CONTROLLER
+// ============================================================
+export class DepartmentController {
+  private departmentService = new DepartmentService();
+
+  /**
+   * GET /api/v1/departments
+   * Lấy danh sách phòng ban (kèm số thành viên)
+   */
+  list = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.view');
+        const departments = await this.departmentService.listDepartments();
+        res.json({ success: true, data: departments });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * GET /api/v1/departments/tree
+   * Lấy cây phòng ban (hierarchy)
+   */
+  tree = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.view');
+        const tree = await this.departmentService.getDepartmentTree();
+        res.json({ success: true, data: tree });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * GET /api/v1/departments/:departmentId
+   * Lấy chi tiết phòng ban + danh sách thành viên
+   */
+  getById = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.view');
+        const department = await this.departmentService.getDepartmentById(req.params.departmentId as string);
+        res.json({ success: true, data: department });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * POST /api/v1/departments
+   * Tạo phòng ban mới
+   */
+  create = [
+    validate(createDepartmentSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.manage');
+        const department = await this.departmentService.createDepartment(req.body);
+        res.status(201).json({ success: true, data: department });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * PUT /api/v1/departments/:departmentId
+   * Cập nhật thông tin phòng ban
+   */
+  update = [
+    validate(updateDepartmentSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.manage');
+        const department = await this.departmentService.updateDepartment(
+          req.params.departmentId as string,
+          req.body
+        );
+        res.json({ success: true, data: department });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * DELETE /api/v1/departments/:departmentId
+   * Xóa mềm phòng ban
+   */
+  delete = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.manage');
+        await this.departmentService.deleteDepartment(req.params.departmentId as string, req.user!.id);
+        res.json({ success: true, message: 'Phòng ban đã được xóa' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * POST /api/v1/departments/:departmentId/members
+   * Thêm thành viên vào phòng ban
+   */
+  addMember = [
+    validate(addMemberSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.manage');
+        const { userId, isManager } = req.body;
+        await this.departmentService.addMember(
+          req.params.departmentId as string,
+          userId,
+          isManager,
+          req.user!.id
+        );
+        res.status(201).json({ success: true, message: 'Đã thêm thành viên' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * DELETE /api/v1/departments/:departmentId/members/:userId
+   * Xóa thành viên khỏi phòng ban
+   */
+  removeMember = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.manage');
+        await this.departmentService.removeMember(
+          req.params.departmentId as string,
+          req.params.userId as string,
+          req.user!.id
+        );
+        res.json({ success: true, message: 'Đã xóa thành viên' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * PUT /api/v1/departments/:departmentId/members/:userId
+   * Cập nhật vai trò thành viên (is_manager)
+   */
+  updateMemberRole = [
+    validate(z.object({
+      body: z.object({
+        isManager: z.boolean(),
+      }),
+    })),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'department.manage');
+        await this.departmentService.updateMemberRole(
+          req.params.departmentId as string,
+          req.params.userId as string,
+          req.body.isManager,
+          req.user!.id
+        );
+        res.json({ success: true, message: 'Đã cập nhật vai trò' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/departments/department.service.ts">
+import crypto from 'crypto';
+import {db} from '../../config/database.js';
+
+import {AppError} from '../../shared/middlewares/error.middleware.js';
+
+
+export class DepartmentService {
+  async listDepartments() {
+    const departments = await db.selectFrom('departments')
+      .leftJoin('users', 'users.id', 'departments.manager_user_id')
+      .select([
+        'departments.id',
+        'departments.code',
+        'departments.name',
+        'departments.parent_id',
+        'departments.manager_user_id',
+        'users.full_name as manager_name',
+        'departments.created_at',
+      ])
+      .where('departments.deleted_at', 'is', null)
+      .orderBy('departments.name')
+      .execute();
+
+    // Đếm số thành viên
+    const memberCounts = await db.selectFrom('department_members')
+      .select([
+        'department_id',
+        db.fn.count<number>('user_id').as('member_count'),
+      ])
+      .groupBy('department_id')
+      .execute();
+
+    const countMap = new Map(memberCounts.map(m => [m.department_id, Number(m.member_count)]));
+
+    return departments.map(d => ({
+      ...d,
+      member_count: countMap.get(d.id) || 0,
+    }));
+  }
+
+  async getDepartmentById(departmentId: string) {
+    const department = await db.selectFrom('departments')
+      .leftJoin('users', 'users.id', 'departments.manager_user_id')
+      .select([
+        'departments.id',
+        'departments.code',
+        'departments.name',
+        'departments.parent_id',
+        'departments.manager_user_id',
+        'users.full_name as manager_name',
+        'departments.created_at',
+      ])
+      .where('departments.id', '=', departmentId)
+      .where('departments.deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!department) throw new AppError(404, 'Phòng ban không tồn tại');
+
+    // Lấy members
+    const members = await db.selectFrom('department_members')
+      .innerJoin('users', 'users.id', 'department_members.user_id')
+      .leftJoin('positions' as any, 'positions.id', 'users.position_id')
+      .select([
+        'users.id',
+        'users.email',
+        'users.full_name',
+        'positions.name as position_name',
+        'department_members.is_manager',
+        'department_members.joined_at',
+      ])
+      .where('department_members.department_id', '=', departmentId)
+      .execute();
+
+    return { ...department, members };
+  }
+
+  async createDepartment(data: {
+    code: string;
+    name: string;
+    parentId?: string;
+    managerUserId?: string;
+  }) {
+    // Kiểm tra code đã tồn tại chưa
+    const existing = await db.selectFrom('departments')
+      .select('id')
+      .where('code', '=', data.code)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (existing) throw new AppError(409, 'Mã phòng ban đã tồn tại');
+
+    const departmentId = crypto.randomUUID();
+
+    await db.insertInto('departments')
+      .values({
+        id: departmentId,
+        code: data.code,
+        name: data.name,
+        parent_id: data.parentId,
+        manager_user_id: data.managerUserId,
+      })
+      .execute();
+
+    // Tạo workspace cho phòng ban
+    await db.insertInto('workspaces')
+      .values({
+        id: crypto.randomUUID(),
+        type: 'department',
+        name: data.name,
+        department_id: departmentId,
+      })
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        action: 'department.create',
+        target_type: 'department',
+        target_id: departmentId,
+        metadata: JSON.stringify(data) as any,
+      })
+      .execute();
+
+    return this.getDepartmentById(departmentId);
+  }
+
+  async addMember(departmentId: string, userId: string, isManager: boolean = false, actorId?: string) {
+    // Kiểm tra department và user tồn tại
+    const dept = await db.selectFrom('departments').select('id').where('id', '=', departmentId).executeTakeFirst();
+    if (!dept) throw new AppError(404, 'Phòng ban không tồn tại');
+
+    const user = await db.selectFrom('users').select('id').where('id', '=', userId).where('deleted_at', 'is', null).executeTakeFirst();
+    if (!user) throw new AppError(404, 'User không tồn tại');
+
+    await db.insertInto('department_members')
+      .values({
+        department_id: departmentId,
+        user_id: userId,
+        is_manager: isManager,
+      })
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        action: 'department.add_member',
+        target_type: 'department',
+        target_id: departmentId,
+        metadata: JSON.stringify({ userId, isManager, actorId }) as any,
+      })
+      .execute();
+  }
+
+  async removeMember(departmentId: string, userId: string, actorId?: string) {
+    await db.deleteFrom('department_members')
+      .where('department_id', '=', departmentId)
+      .where('user_id', '=', userId)
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        action: 'department.remove_member',
+        target_type: 'department',
+        target_id: departmentId,
+        metadata: JSON.stringify({ userId, actorId }) as any,
+      })
+      .execute();
+  }
+
+  async getDepartmentTree() {
+    const departments = await db.selectFrom('departments')
+      .select(['id', 'code', 'name', 'parent_id', 'manager_user_id', 'created_at'])
+      .where('deleted_at', 'is', null)
+      .orderBy('name')
+      .execute();
+
+    // Build tree
+    const deptMap = new Map<string, any>();
+    const roots: any[] = [];
+
+    departments.forEach(d => {
+      deptMap.set(d.id, { ...d, children: [] });
+    });
+
+    departments.forEach(d => {
+      const node = deptMap.get(d.id);
+      if (d.parent_id && deptMap.has(d.parent_id)) {
+        deptMap.get(d.parent_id).children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    return roots;
+  }
+
+  async updateDepartment(departmentId: string, data: {
+    name?: string;
+    managerUserId?: string;
+  }) {
+    const department = await db.selectFrom('departments')
+      .select('id')
+      .where('id', '=', departmentId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!department) throw new AppError(404, 'Phòng ban không tồn tại');
+
+    await db.updateTable('departments')
+      .set({
+        ...(data.name && { name: data.name }),
+        ...(data.managerUserId !== undefined && { manager_user_id: data.managerUserId }),
+      })
+      .where('id', '=', departmentId)
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        action: 'department.update',
+        target_type: 'department',
+        target_id: departmentId,
+        metadata: JSON.stringify(data) as any,
+      })
+      .execute();
+
+    return this.getDepartmentById(departmentId);
+  }
+
+  async deleteDepartment(departmentId: string, actorId?: string) {
+    const dept = await db.selectFrom('departments').select('id')
+      .where('id', '=', departmentId).where('deleted_at', 'is', null).executeTakeFirst();
+    if (!dept) throw new AppError(404, 'Phòng ban không tồn tại');
+
+    const child = await db.selectFrom('departments').select('id')
+      .where('parent_id', '=', departmentId).where('deleted_at', 'is', null).executeTakeFirst();
+    if (child) throw new AppError(400, 'Không thể xóa phòng ban còn có phòng ban con');
+
+    const member = await db.selectFrom('department_members').select('user_id')
+      .where('department_id', '=', departmentId).executeTakeFirst();
+    if (member) throw new AppError(400, 'Vui lòng chuyển hết thành viên trước khi xóa');
+
+    await db.transaction().execute(async (trx) => {
+      await trx.updateTable('departments').set({ deleted_at: new Date() })
+        .where('id', '=', departmentId).execute();
+      await trx.updateTable('workspaces').set({ deleted_at: new Date() })
+        .where('department_id', '=', departmentId).where('type', '=', 'department').execute();
+      await trx.insertInto('audit_logs').values({
+        actor_id: actorId ?? null, action: 'department.delete',
+        target_type: 'department', target_id: departmentId,
+      }).execute();
+    });
+  }
+
+  async updateMemberRole(departmentId: string, userId: string, isManager: boolean, actorId?: string) {
+    const member = await db.selectFrom('department_members')
+      .select(['department_id', 'user_id']) 
+      .where('department_id', '=', departmentId)
+      .where('user_id', '=', userId)
+      .executeTakeFirst();
+
+    if (!member) throw new AppError(404, 'Thành viên không tồn tại trong phòng ban');
+
+    await db.updateTable('department_members')
+      .set({ is_manager: isManager })
+      .where('department_id', '=', departmentId)
+      .where('user_id', '=', userId)
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        action: 'department.update_member_role',
+        target_type: 'department',
+        target_id: departmentId,
+        metadata: JSON.stringify({ userId, isManager, actorId }) as any,
+      })
+      .execute();
+  }
+}
+</file>
+
+<file path="src/modules/folders/folder.controller.ts">
+import type { Request, Response, NextFunction } from 'express';
+import {FolderService} from './folder.service.js';
+
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import { z } from 'zod';
+
+const createFolderSchema = z.object({
+  workspaceId: z.string().uuid(),
+  parentId: z.string().uuid().nullable(),
+  name: z.string().min(1).max(255).regex(/^[^/\\]+$/, 'Tên không được chứa / hoặc \\'),
+});
+
+export class FolderController {
+  private folderService = new FolderService();
+
+  async getTree(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { workspaceId } = req.params;
+      const result = await this.folderService.getFolderTree(req.user!.id, workspaceId as string);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async create(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const validated = createFolderSchema.parse(req.body);
+      const folder = await this.folderService.createFolder(
+        req.user!.id,
+        validated.workspaceId,
+        validated.parentId,
+        validated.name
+      );
+      res.status(201).json({ success: true, data: folder });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+</file>
+
+<file path="src/modules/folders/folder.service.ts">
+import {db} from '../../config/database.js';
+import crypto from 'crypto';
+import {AppError} from '../../shared/middlewares/error.middleware.js';
+
+import {hasFolderAccess, requireFolderAccess} from '../../shared/utils/permission.js';
+
+
+export class FolderService {
+  /**
+   * Lấy cây thư mục của một workspace.
+   * Sử dụng ltree để query toàn bộ cây chỉ với 1 câu SQL.
+   */
+  async getFolderTree(userId: string, workspaceId: string) {
+    // 1. Kiểm tra user có quyền truy cập workspace này không
+    // (Phase 1: đơn giản hóa - mọi user đều xem được workspace company)
+    const workspace = await db.selectFrom('workspaces')
+      .select(['id', 'type', 'name', 'department_id', 'owner_user_id'])
+      .where('id', '=', workspaceId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!workspace) throw new AppError(404, 'Workspace không tồn tại');
+
+    // 2. Lấy TẤT CẢ folders trong workspace (ltree giúp query cực nhanh)
+    const folders = await db.selectFrom('folders')
+      .select(['id', 'name', 'parent_id', 'path', 'depth', 'created_at'])
+      .where('workspace_id', '=', workspaceId)
+      .where('deleted_at', 'is', null)
+      .orderBy('path')
+      .execute();
+
+    // 3. Lọc theo quyền truy cập (Phase 1: giữ tất cả, Phase 2 lọc chi tiết)
+    // Phase 2: Gọi hasFolderAccess cho từng folder
+
+    // 4. Build cây từ danh sách phẳng (dùng Map để O(n))
+    const folderMap = new Map<string, any>();
+    const roots: any[] = [];
+
+    // Tạo node cho từng folder
+    folders.forEach(f => {
+      folderMap.set(f.id, { ...f, children: [] });
+    });
+
+    // Build cây
+    folders.forEach(f => {
+      const node = folderMap.get(f.id);
+      if (f.parent_id && folderMap.has(f.parent_id)) {
+        folderMap.get(f.parent_id).children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    return {
+      workspace: { id: workspace.id, name: workspace.name, type: workspace.type },
+      tree: roots,
+      total: folders.length
+    };
+  }
+
+  /**
+   * Tạo thư mục mới
+   */
+  async createFolder(userId: string, workspaceId: string, parentId: string | null, name: string) {
+    // 1. Kiểm tra quyền tạo folder
+    if (parentId) {
+      await requireFolderAccess(userId, parentId, 'edit');
+    }
+
+    // 2. Kiểm tra workspace tồn tại
+    const workspace = await db.selectFrom('workspaces')
+      .select('id')
+      .where('id', '=', workspaceId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!workspace) throw new AppError(404, 'Workspace không tồn tại');
+
+    // 3. Insert folder (trigger folders_path_trg sẽ tự tính path)
+    const folderId = crypto.randomUUID();
+    await db.insertInto('folders')
+      .values({
+        id: folderId,
+        workspace_id: workspaceId,
+        parent_id: parentId,
+        name: name.trim(),
+        created_by: userId,
+      })
+      .execute();
+
+    // 4. Lấy lại folder vừa tạo (có path)
+    const folder = await db.selectFrom('folders')
+      .select(['id', 'name', 'path', 'depth', 'parent_id'])
+      .where('id', '=', folderId)
+      .executeTakeFirstOrThrow();
+
+    // 5. Audit log
+    await db.insertInto('audit_logs').values({
+      actor_id: userId,
+      action: 'folder.create',
+      target_type: 'folder',
+      target_id: folderId,
+      metadata: JSON.stringify({ name, workspaceId, parentId }) as any,
+    }).execute();
+
+    return folder;
+  }
+}
+</file>
+
+<file path="src/modules/health/health.controller.ts">
+import type { Request, Response } from 'express';
+import {db} from '../../config/database.js';
+
+
+export const healthCheck = async (req: Request, res: Response) => {
+  try {
+    // Check DB
+    await db.selectFrom('users').select('id').limit(1).execute();
+    
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      checks: {
+        database: 'ok',
+        memory: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
+      },
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      checks: { database: 'failed' },
+    });
+  }
+};
+</file>
+
+<file path="src/modules/invitations/invitation.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { z } from 'zod';
+import {InvitationService} from './invitation.service.js';
+
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import {validate} from '../../shared/middlewares/validate.middleware.js';
+
+
+const createInvitationSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    departmentId: z.string().uuid().optional(),
+    positionId: z.string().uuid().optional(),
+    roleIds: z.array(z.string().uuid()).min(1, 'Phải chọn ít nhất 1 vai trò'),
+  }),
+});
+
+const acceptInvitationSchema = z.object({
+  body: z.object({
+    token: z.string().min(1),
+    password: z.string().min(6),
+    fullName: z.string().min(1),
+  }),
+});
+
+export class InvitationController {
+  private invitationService = new InvitationService();
+
+  create = [
+    validate(createInvitationSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const result = await this.invitationService.createInvitation(req.user!.id, req.body);
+        res.status(201).json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  accept = [
+    validate(acceptInvitationSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { token, password, fullName } = req.body;
+        const result = await this.invitationService.acceptInvitation(token, password, fullName);
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  list = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { status, page, limit } = req.query;
+        const result = await this.invitationService.listInvitations({
+          status: status as string,
+          ...(page ? { page: Number(page) } : {}),
+          ...(limit ? { limit: Number(limit) } : {}),
+        });
+        res.json({ success: true, ...result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  revoke = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { invitationId } = req.params;
+        const result = await this.invitationService.revokeInvitation(invitationId as string, req.user!.id);
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/invitations/invitation.service.ts">
+import crypto from 'crypto';
+import bcrypt from 'bcrypt';
+import {db} from '../../config/database.js';
+
+import {AppError} from '../../shared/middlewares/error.middleware.js';
+
+import {EmailService} from '../../shared/services/email.service.js';
+
+import {requireFunctionalPermission} from '../../shared/utils/permission.js';
+
+
+export class InvitationService {
+  private emailService = new EmailService();
+
+  async createInvitation(
+    inviterId: string,
+    data: {
+      email: string;
+      departmentId?: string;
+      positionId?: string;
+      roleIds: string[];
+    }
+  ) {
+    // 1. Check permission
+    await requireFunctionalPermission(inviterId, 'user.invite');
+
+    // 2. Check email đã tồn tại chưa
+    const existingUser = await db.selectFrom('users')
+      .select('id')
+      .where('email', '=', data.email)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (existingUser) {
+      throw new AppError(409, 'Email đã được sử dụng');
+    }
+
+    // 3. Check đã có invitation pending chưa
+    const existingInvitation = await db.selectFrom('invitations')
+      .select('id')
+      .where('email', '=', data.email)
+      .where('status', '=', 'pending')
+      .where('expires_at', '>', new Date())
+      .executeTakeFirst();
+
+    if (existingInvitation) {
+      throw new AppError(409, 'Đã có lời mời đang chờ cho email này');
+    }
+
+    // 4. Tạo token
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 ngày
+
+    // 5. Lưu invitation
+    const invitationId = crypto.randomUUID();
+    await db.insertInto('invitations')
+      .values({
+        id: invitationId,
+        email: data.email,
+        token_hash: tokenHash,
+        invited_by: inviterId,
+        department_id: data.departmentId,
+        position_id: data.positionId,
+        role_ids: data.roleIds,
+        status: 'pending',
+        expires_at: expiresAt,
+      })
+      .execute();
+
+    // 6. Gửi email
+    const inviter = await db.selectFrom('users')
+      .select('full_name')
+      .where('id', '=', inviterId)
+      .executeTakeFirstOrThrow();
+
+    const invitationLink = `${process.env.FRONTEND_URL}/accept-invitation?token=${token}`;
+    await this.emailService.sendInvitationEmail(data.email, invitationLink, inviter.full_name);
+
+    // 7. Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        actor_id: inviterId,
+        action: 'invitation.create',
+        target_type: 'invitation',
+        target_id: invitationId,
+        metadata: JSON.stringify({ email: data.email, departmentId: data.departmentId }) as any,
+      })
+      .execute();
+
+    return { id: invitationId, email: data.email, expiresAt };
+  }
+
+  async acceptInvitation(token: string, password: string, fullName: string) {
+    // 1. Verify token
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    const invitation = await db.selectFrom('invitations')
+      .select(['id', 'email', 'invited_by', 'department_id', 'position_id', 'role_ids', 'status', 'expires_at'])
+      .where('token_hash', '=', tokenHash)
+      .executeTakeFirst();
+
+    if (!invitation) {
+      throw new AppError(400, 'Token không hợp lệ');
+    }
+
+    if (invitation.status !== 'pending') {
+      throw new AppError(400, 'Lời mời không còn hiệu lực');
+    }
+
+    if (new Date(invitation.expires_at) < new Date()) {
+      // Đánh dấu hết hạn
+      await db.updateTable('invitations')
+        .set({ status: 'expired' })
+        .where('id', '=', invitation.id)
+        .execute();
+      throw new AppError(400, 'Lời mời đã hết hạn');
+    }
+
+    // 2. Tạo user
+    const userId = crypto.randomUUID();
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await db.transaction().execute(async (trx) => {
+      // Tạo user
+      await trx.insertInto('users' as any)
+        .values({
+          id: userId,
+          email: invitation.email,
+          password_hash: passwordHash,
+          full_name: fullName,
+          position_id: invitation.position_id,
+          status: 'active',
+          email_verified_at: new Date(),
+        } as any)
+        .execute();
+
+      // Gán vào department
+      if (invitation.department_id) {
+        await trx.insertInto('department_members')
+          .values({
+            department_id: invitation.department_id,
+            user_id: userId,
+            is_manager: false,
+          })
+          .execute();
+      }
+
+      // Gán roles
+      if (invitation.role_ids.length > 0) {
+        await trx.insertInto('user_roles')
+          .values(invitation.role_ids.map(roleId => ({
+            id: crypto.randomUUID(),
+            user_id: userId,
+            role_id: roleId,
+            scope_type: 'global' as const,
+          })))
+          .execute();
+      }
+
+      // Tạo personal workspace
+      await trx.insertInto('workspaces')
+        .values({
+          id: crypto.randomUUID(),
+          type: 'personal',
+          name: `Của ${fullName}`,
+          owner_user_id: userId,
+          created_by: userId,
+        })
+        .execute();
+
+      // Đánh dấu invitation đã chấp nhận
+      await trx.updateTable('invitations')
+        .set({
+          status: 'accepted',
+          accepted_at: new Date(),
+          accepted_by: userId,
+        })
+        .where('id', '=', invitation.id)
+        .execute();
+
+      // Audit log
+      await trx.insertInto('audit_logs')
+        .values({
+          actor_id: userId,
+          action: 'invitation.accept',
+          target_type: 'invitation',
+          target_id: invitation.id,
+          metadata: JSON.stringify({ email: invitation.email }) as any,
+        })
+        .execute();
+    });
+
+    return { userId, email: invitation.email };
+  }
+
+  async listInvitations(options: { status?: string; page?: number; limit?: number }) {
+    const page = options.page || 1;
+    const limit = Math.min(options.limit || 20, 100);
+    const offset = (page - 1) * limit;
+
+    let query = db.selectFrom('invitations')
+      .leftJoin('users as inviter', 'inviter.id', 'invitations.invited_by')
+      .leftJoin('users as accepted', 'accepted.id', 'invitations.accepted_by')
+      .leftJoin('departments', 'departments.id', 'invitations.department_id')
+      .select([
+        'invitations.id',
+        'invitations.email',
+        'invitations.status',
+        'invitations.expires_at',
+        'invitations.created_at',
+        'invitations.accepted_at',
+        'inviter.full_name as inviter_name',
+        'accepted.full_name as accepted_by_name',
+        'departments.name as department_name',
+      ])
+      .orderBy('invitations.created_at', 'desc');
+
+    if (options.status) {
+      query = query.where('invitations.status', '=', options.status);
+    }
+
+    const invitations = await query.limit(limit).offset(offset).execute();
+
+    const countResult = await db.selectFrom('invitations')
+      .select(db.fn.count<number>('id').as('total'))
+      .executeTakeFirstOrThrow();
+
+    return {
+      data: invitations,
+      pagination: {
+        page,
+        limit,
+        total: Number(countResult.total),
+        totalPages: Math.ceil(Number(countResult.total) / limit),
+      },
+    };
+  }
+
+  async revokeInvitation(invitationId: string, userId: string) {
+    const invitation = await db.selectFrom('invitations')
+      .select(['id', 'status'])
+      .where('id', '=', invitationId)
+      .executeTakeFirst();
+
+    if (!invitation) throw new AppError(404, 'Lời mời không tồn tại');
+
+    if (invitation.status !== 'pending') {
+      throw new AppError(400, 'Chỉ có thể thu hồi lời mời đang chờ');
+    }
+
+    await db.updateTable('invitations')
+      .set({
+        status: 'revoked',
+        revoked_at: new Date(),
+      })
+      .where('id', '=', invitationId)
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        actor_id: userId,
+        action: 'invitation.revoke',
+        target_type: 'invitation',
+        target_id: invitationId,
+      })
+      .execute();
+
+    return { message: 'Lời mời đã được thu hồi' };
+  }
+}
+</file>
+
+<file path="src/modules/positions/position.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { z } from 'zod';
+import { PositionService } from './position.service.js';
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import {validate} from '../../shared/middlewares/validate.middleware.js';
+
+import {requireFunctionalPermission} from '../../shared/utils/permission.js';
+
+
+const createPositionSchema = z.object({
+  body: z.object({
+    code: z.string()
+      .min(2)
+      .max(30)
+      .regex(/^[A-Z0-9_]+$/, 'Mã chỉ chứa chữ hoa, số và dấu _'),
+    name: z.string().min(1).max(100),
+    level: z.enum(['intern', 'junior', 'staff', 'senior', 'lead', 'manager', 'director', 'cxo']),
+    description: z.string().max(500).optional(),
+  }),
+});
+
+const updatePositionSchema = z.object({
+  body: z.object({
+    name: z.string().min(1).max(100).optional(),
+    level: z.enum(['intern', 'junior', 'staff', 'senior', 'lead', 'manager', 'director', 'cxo']).optional(),
+    description: z.string().max(500).optional(),
+  }),
+});
+
+export class PositionController {
+  private positionService = new PositionService();
+
+  list = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'position.view');
+        const positions = await this.positionService.listPositions();
+        res.json({ success: true, data: positions });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  getById = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'position.view');
+        const position = await this.positionService.getPositionById(req.params.positionId as string);
+        res.json({ success: true, data: position });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  create = [
+    validate(createPositionSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'position.manage');
+        const position = await this.positionService.createPosition(req.body);
+        res.status(201).json({ success: true, data: position });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  update = [
+    validate(updatePositionSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'position.manage');
+        const position = await this.positionService.updatePosition(req.params.positionId as string, req.body);
+        res.json({ success: true, data: position });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  delete = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'position.manage');
+        await this.positionService.deletePosition(req.params.positionId as string);
+        res.json({ success: true, message: 'Chức vụ đã được xóa' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/positions/position.service.ts">
+// src/modules/positions/position.service.ts
+import crypto from 'crypto';
+import { db } from '../../config/database.js';
+import { AppError } from '../../shared/middlewares/error.middleware.js';
+
+export class PositionService {
+  async listPositions() {
+    return await db.selectFrom('positions' as any)
+      .select(['id', 'code', 'name', 'level', 'description', 'is_system'] as any)
+      .where('deleted_at', 'is', null)
+      .orderBy('level')
+      .execute();
+  }
+
+  async getPositionById(positionId: string) {
+    const position = await db.selectFrom('positions' as any)
+      .select(['id', 'code', 'name', 'level', 'description', 'is_system', 'created_at'] as any)
+      .where('id', '=', positionId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!position) throw new AppError(404, 'Chức vụ không tồn tại');
+
+    // Đếm số user đang giữ chức vụ này
+    const countResult = await db.selectFrom('users')
+      .select(db.fn.count<number>('id').as('user_count'))
+      .where('position_id' as any, '=', positionId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirstOrThrow();
+
+    return { ...position, user_count: Number(countResult.user_count) };
+  }
+
+  async createPosition(data: { code: string; name: string; level: string; description?: string }) {
+    const existing = await db.selectFrom('positions' as any)
+      .select('id' as any)
+      .where('code', '=', data.code)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (existing) throw new AppError(409, 'Mã chức vụ đã tồn tại');
+
+    const positionId = crypto.randomUUID();
+    await db.insertInto('positions' as any)
+      .values({
+        id: positionId,
+        code: data.code,
+        name: data.name,
+        level: data.level,
+        description: data.description,
+      } as any)
+      .execute();
+
+    return this.getPositionById(positionId);
+  }
+
+  async updatePosition(positionId: string, data: { name?: string; level?: string; description?: string }) {
+    const position = await db.selectFrom('positions' as any)
+      .select(['id', 'is_system'] as any)
+      .where('id', '=', positionId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!position) throw new AppError(404, 'Chức vụ không tồn tại');
+    if ((position as any).is_system) throw new AppError(400, 'Không thể sửa chức vụ hệ thống');
+
+    await db.updateTable('positions' as any)
+      .set({
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.level !== undefined && { level: data.level }),
+        ...(data.description !== undefined && { description: data.description }),
+      } as any)
+      .where('id', '=', positionId)
+      .execute();
+
+    return this.getPositionById(positionId);
+  }
+
+  async deletePosition(positionId: string) {
+    const position = await db.selectFrom('positions' as any)
+      .select(['id', 'is_system'] as any)
+      .where('id', '=', positionId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!position) throw new AppError(404, 'Chức vụ không tồn tại');
+    if ((position as any).is_system) throw new AppError(400, 'Không thể xóa chức vụ hệ thống');
+
+    // Kiểm tra có user nào đang dùng không
+    const hasUsers = await db.selectFrom('users')
+      .select('id')
+      .where('position_id' as any, '=', positionId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (hasUsers) {
+      throw new AppError(400, 'Không thể xóa chức vụ đang có nhân viên sử dụng');
+    }
+
+    await db.updateTable('positions' as any)
+      .set({ deleted_at: new Date() } as any)
+      .where('id', '=', positionId)
+      .execute();
+  }
+}
+</file>
+
+<file path="src/modules/resources/resource.controller.ts">
+import type { Request, Response, NextFunction } from 'express';
+import multer from 'multer';
+import {ResourceService} from './resource.service.js';
+
+import type {AuthRequest} from '../../shared/middlewares/auth.middleware.js';
+
+import {authenticate} from '../../shared/middlewares/auth.middleware.js';
+
+import {AppError} from '../../shared/middlewares/error.middleware.js';
+
+import {validateFile} from '../../shared/utils/fileValidator.js';
+
+import {uploadLimiter} from '../../shared/middlewares/rateLimit.middleware.js';
+
+
+// Cấu hình Multer: Lưu vào RAM (buffer) để Storage Driver xử lý
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+});
+
+export class ResourceController {
+  private resourceService = new ResourceService();
+
+  upload = [
+    authenticate,
+    uploadLimiter,
+    uploadMiddleware,
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        if (!req.file) throw new AppError(400, 'No file provided');
+        
+        // Validate file trước khi xử lý
+        await validateFile(req.file);
+        
+        const folderId = req.body.folderId;
+        if (!folderId) throw new AppError(400, 'Thiếu folderId');
+        
+        await this.resourceService.uploadFile(req.user!.id, folderId, req.file);
+        
+        res.status(201).json({ success: true, message: 'Upload successful' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  async download(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { resourceId } = req.params;
+      const { stream, filename, mimeType } = await this.resourceService.downloadFile(resourceId as string, req.user!.id);
+
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+      res.setHeader('Content-Type', mimeType || 'application/octet-stream');
+      
+      stream.pipe(res);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  list = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { folderId, page, limit, sortBy, order } = req.query;
+        
+        if (!folderId || typeof folderId !== 'string') {
+          throw new AppError(400, 'Thiếu tham số folderId');
+        }
+
+        const result = await this.resourceService.listResources(req.user!.id, folderId as string, {
+          ...(page ? { page: Number(page) } : {}),
+          ...(limit ? { limit: Number(limit) } : {}),
+          sortBy: sortBy as any,
+          order: order as any,
+        });
+
+        res.json({ success: true, ...result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  getDetail = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { resourceId } = req.params;
+        const result = await this.resourceService.getResourceDetail(req.user!.id, resourceId as string);
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  moveToTrash = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { resourceId } = req.params;
+        await this.resourceService.moveToTrash(req.user!.id, resourceId as string);
+        res.json({ success: true, message: 'Đã chuyển vào thùng rác' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  restoreFromTrash = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { resourceId } = req.params;
+        await this.resourceService.restoreFromTrash(req.user!.id, resourceId as string);
+        res.json({ success: true, message: 'Đã khôi phục tài nguyên' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  listTrash = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const result = await this.resourceService.listTrash(req.user!.id);
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  permanentDelete = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { resourceId } = req.params;
+        await this.resourceService.permanentDelete(req.user!.id, resourceId as string);
+        res.json({ success: true, message: 'Đã xóa vĩnh viễn' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+
+export const uploadMiddleware = upload.single('file');
+</file>
+
+<file path="src/modules/resources/resource.service.ts">
+import crypto from 'crypto';
+import {db} from '../../config/database.js';
+import { requireFolderAccess, accessibleResourceSql } from '../../shared/utils/permission.js';
+
+import {getStorageDriver} from '../../shared/storage/storage.factory.js';
+
+import {AppError} from '../../shared/middlewares/error.middleware.js';
+import { sql } from 'kysely';
+
+export class ResourceService {
+  private storage = getStorageDriver();
+
+  async uploadFile(userId: string, folderId: string, file: Express.Multer.File) {
+    // 1. Kiểm tra folder tồn tại
+    const folder = await db.selectFrom('folders')
+      .select(['id', 'workspace_id'])
+      .where('id', '=', folderId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!folder) throw new AppError(404, 'Folder không tồn tại hoặc đã bị xóa');
+
+    // 2. Kiểm tra Quota (Đơn giản hóa: kiểm tra quota của workspace)
+    const quota = await db.selectFrom('storage_quotas')
+      .select(['limit_bytes', 'used_bytes'])
+      .where('scope_type', '=', 'workspace')
+      .where('scope_id', '=', folder.workspace_id)
+      .executeTakeFirst();
+
+    if (quota && Number(quota.used_bytes) + file.size > Number(quota.limit_bytes)) {
+      throw new AppError(413, 'Dung lượng lưu trữ của không gian này đã đầy');
+    }
+
+    // 3. Tạo key duy nhất và upload lên Storage Driver
+    const datePath = (new Date().toISOString() as string).split('T')[0]!.replace(/-/g, '/');
+    const uniqueId = crypto.randomUUID();
+    const objectKey = `resources/${datePath}/${uniqueId}-${file.originalname}`;
+    
+    // Tính checksum SHA-256 của file
+    const checksum = crypto.createHash('sha256').update(file.buffer).digest('hex');
+
+    const storageFile = await this.storage.upload(objectKey, file.buffer, {
+      metadata: { mimeType: file.mimetype, uploadedBy: userId },
+    });
+
+    // 4. DATABASE TRANSACTION (All or Nothing)
+    const resourceId = crypto.randomUUID();
+    const versionId = crypto.randomUUID();
+    const storageObjectId = crypto.randomUUID();
+
+    try {
+      await db.transaction().execute(async (trx) => {
+        // 4.1. Lưu thông tin Object vật lý vào storage_objects
+        await trx.insertInto('storage_objects')
+          .values({
+            id: storageObjectId,
+            provider: 'local', // Hoặc lấy từ env
+            object_key: objectKey,
+            size_bytes: BigInt(file.size),
+            checksum_sha256: checksum,
+            mime_type: file.mimetype,
+            status: 'active',
+            created_by: userId,
+          })
+          .execute();
+
+        // 4.2. Lưu phiên bản file (resource_versions)
+        await trx.insertInto('resource_versions')
+          .values({
+            id: versionId,
+            resource_id: resourceId,
+            version_number: 1,
+            storage_object_id: storageObjectId,
+            original_name: file.originalname,
+            size_bytes: BigInt(file.size),
+            mime_type: file.mimetype,
+            checksum_sha256: checksum,
+            created_by: userId,
+          })
+          .execute();
+
+        // 4.3. Lưu metadata tài nguyên (resources)
+        await trx.insertInto('resources')
+          .values({
+            id: resourceId,
+            folder_id: folderId,
+            name: file.originalname,
+            type: 'file',
+            current_version_id: versionId,
+            mime_type: file.mimetype,
+            size_bytes: BigInt(file.size),
+            status: 'active',
+            created_by: userId,
+          })
+          .execute();
+
+        // 4.4. Cập nhật dung lượng đã sử dụng (Storage Quota)
+        if (quota) {
+          await trx.updateTable('storage_quotas')
+            .set({
+              used_bytes: sql`used_bytes + ${BigInt(file.size)}`,
+            })
+            .where('scope_type', '=', 'workspace')
+            .where('scope_id', '=', folder.workspace_id)
+            .execute();
+        }
+
+        // 4.5. Ghi Audit Log
+        await trx.insertInto('audit_logs')
+          .values({
+            actor_id: userId,
+            action: 'resource.upload',
+            target_type: 'resource',
+            target_id: resourceId,
+            metadata: sql`'{"fileName": "${file.originalname}", "size": ${file.size}}'::jsonb`,
+          })
+          .execute();
+      });
+    } catch (error) {
+      // Log chi tiết để debug
+      console.error('Upload transaction failed:', error);
+      // Nếu DB lỗi, rollback tự động.
+      throw new AppError(500, 'Lỗi khi lưu thông tin file vào hệ thống');
+    }
+
+    return { resourceId, name: file.originalname, size: file.size };
+  }
+
+  async downloadFile(resourceId: string, userId: string) {
+    // 1. Lấy thông tin file và version hiện tại
+    const resource = await db.selectFrom('resources')
+      .innerJoin('resource_versions', 'resource_versions.resource_id', 'resources.id')
+      .innerJoin('storage_objects', 'storage_objects.id', 'resource_versions.storage_object_id')
+      .select([
+        'storage_objects.object_key',
+        'storage_objects.provider',
+        'resources.name',
+        'resources.mime_type',
+        'resources.folder_id'
+      ])
+      .where('resources.id', '=', resourceId)
+      .where('resources.status', '!=', 'deleted')
+      .executeTakeFirst();
+
+    if (!resource) throw new AppError(404, 'Tài nguyên không tồn tại');
+
+    // 2. Kiểm tra quyền truy cập folder
+    await requireFolderAccess(userId, resource.folder_id, 'view');
+
+    // 3. Ghi Audit Log download (không cần transaction vì không ảnh hưởng nghiệp vụ chính)
+    await db.insertInto('audit_logs').values({
+      actor_id: userId,
+      action: 'resource.download',
+      target_type: 'resource',
+      target_id: resourceId,
+    }).execute();
+
+    // 4. Trả về stream từ Storage Driver
+    const stream = await this.storage.getStream(resource.object_key);
+    return { stream, filename: resource.name, mimeType: resource.mime_type };
+  }
+
+  /**
+   * Lấy danh sách resources trong một folder (không đệ quy)
+   */
+  async listResources(userId: string, folderId: string, options: {
+  page?: number;
+  limit?: number;
+  sortBy?: 'name' | 'created_at' | 'size_bytes';
+  order?: 'asc' | 'desc';
+}) {
+  // 1. Kiểm tra quyền xem folder
+  await requireFolderAccess(userId, folderId, 'view');
+
+  const page = options.page || 1;
+  const limit = Math.min(options.limit || 50, 100);
+  const offset = (page - 1) * limit;
+  const sortBy = options.sortBy || 'created_at';
+  const order = options.order || 'desc';
+
+  // 2. Query với Kysely (type-safe)
+  const resources = await db.selectFrom('resources')
+    .leftJoin('users', 'users.id', 'resources.created_by')
+    .select([
+      'resources.id',
+      'resources.name',
+      'resources.type',
+      'resources.mime_type',
+      'resources.size_bytes',
+      'resources.status',
+      'resources.created_at',
+      'resources.updated_at',
+      'users.full_name as created_by_name',
+    ])
+    .where('resources.folder_id', '=', folderId)
+    .where('resources.deleted_at', 'is', null)
+    .orderBy(sortBy, order)
+    .limit(limit)
+    .offset(offset)
+    .execute();
+
+  // 3. Đếm tổng số (để pagination)
+  const countResult = await db.selectFrom('resources')
+    .select(db.fn.count<number>('id').as('total'))
+    .where('folder_id', '=', folderId)
+    .where('deleted_at', 'is', null)
+    .executeTakeFirstOrThrow();
+
+  return {
+    data: resources.map(r => ({
+      ...r,
+      size_bytes: Number(r.size_bytes), // Convert bigint -> number cho JSON
+    })),
+    pagination: {
+      page,
+      limit,
+      total: Number(countResult.total),
+      totalPages: Math.ceil(Number(countResult.total) / limit),
+    }
+  };
+}
+
+/**
+ * Lấy thông tin chi tiết 1 resource (kèm versions)
+ */
+  async getResourceDetail(userId: string, resourceId: string) {
+  // 1. Lấy resource + folder + creator
+  const resource = await db.selectFrom('resources')
+    .innerJoin('folders', 'folders.id', 'resources.folder_id')
+    .leftJoin('users', 'users.id', 'resources.created_by')
+    .select([
+      'resources.id',
+      'resources.name',
+      'resources.type',
+      'resources.mime_type',
+      'resources.size_bytes',
+      'resources.status',
+      'resources.created_at',
+      'resources.updated_at',
+      'resources.folder_id',
+      'folders.name as folder_name',
+      'folders.workspace_id',
+      'users.full_name as created_by_name',
+    ])
+    .where('resources.id', '=', resourceId)
+    .where('resources.deleted_at', 'is', null)
+    .executeTakeFirst();
+
+  if (!resource) throw new AppError(404, 'Tài nguyên không tồn tại');
+
+  // 2. Kiểm tra quyền xem
+  await requireFolderAccess(userId, resource.folder_id, 'view');
+
+  // 3. Lấy danh sách versions
+  const versions = await db.selectFrom('resource_versions')
+    .leftJoin('users', 'users.id', 'resource_versions.created_by')
+    .select([
+      'resource_versions.id',
+      'resource_versions.version_number',
+      'resource_versions.original_name',
+      'resource_versions.size_bytes',
+      'resource_versions.mime_type',
+      'resource_versions.created_at',
+      'users.full_name as created_by_name',
+    ])
+    .where('resource_versions.resource_id', '=', resourceId)
+    .orderBy('resource_versions.version_number', 'desc')
+    .execute();
+
+  // 4. Audit log (view)
+  await db.insertInto('audit_logs').values({
+    actor_id: userId,
+    action: 'resource.view',
+    target_type: 'resource',
+    target_id: resourceId,
+  }).execute();
+
+  return {
+    ...resource,
+    size_bytes: Number(resource.size_bytes),
+    versions: versions.map(v => ({ ...v, size_bytes: Number(v.size_bytes) })),
+  };
+}
+
+  async moveToTrash(userId: string, resourceId: string) {
+  const resource = await db.selectFrom('resources')
+    .select(['id', 'folder_id', 'size_bytes'])
+    .where('id', '=', resourceId)
+    .where('deleted_at', 'is', null)
+    .executeTakeFirst();
+
+  if (!resource) throw new AppError(404, 'Tài nguyên không tồn tại');
+
+  await requireFolderAccess(userId, resource.folder_id, 'delete');
+
+  await db.updateTable('resources')
+    .set({
+      status: 'trashed',
+      trashed_at: new Date(),
+    })
+    .where('id', '=', resourceId)
+    .execute();
+
+  // Audit log
+  await db.insertInto('audit_logs')
+    .values({
+      actor_id: userId,
+      action: 'resource.trash',
+      target_type: 'resource',
+      target_id: resourceId,
+    })
+    .execute();
+}
+
+  async restoreFromTrash(userId: string, resourceId: string) {
+  const resource = await db.selectFrom('resources')
+    .select(['id', 'folder_id'])
+    .where('id', '=', resourceId)
+    .where('status', '=', 'trashed')
+    .executeTakeFirst();
+
+  if (!resource) throw new AppError(404, 'Tài nguyên không tồn tại hoặc chưa bị xóa');
+
+  await requireFolderAccess(userId, resource.folder_id, 'edit');
+
+  await db.updateTable('resources')
+    .set({
+      status: 'active',
+      trashed_at: null,
+    })
+    .where('id', '=', resourceId)
+    .execute();
+
+  // Audit log
+  await db.insertInto('audit_logs')
+    .values({
+      actor_id: userId,
+      action: 'resource.restore',
+      target_type: 'resource',
+      target_id: resourceId,
+    })
+    .execute();
+}
+
+  async listTrash(userId: string) {
+  const resources = await db.selectFrom('resources')
+    .innerJoin('folders', 'folders.id', 'resources.folder_id')
+    .select([
+      'resources.id',
+      'resources.name',
+      'resources.type',
+      'resources.mime_type',
+      'resources.size_bytes',
+      'resources.trashed_at',
+      'folders.name as folder_name',
+    ])
+    .where('resources.status', '=', 'trashed')
+    .where('resources.deleted_at', 'is', null)
+     .where(accessibleResourceSql(userId))
+    .orderBy('resources.trashed_at', 'desc')
+    .execute();
+
+  return resources.map(r => ({ ...r, size_bytes: Number(r.size_bytes) }));
+}
+
+  async permanentDelete(userId: string, resourceId: string) {
+    const resource = await db.selectFrom('resources')
+      .select(['id', 'folder_id', 'size_bytes'])
+      .where('id', '=', resourceId).where('status', '=', 'trashed')
+      .executeTakeFirst();
+    if (!resource) throw new AppError(404, 'Tài nguyên không tồn tại hoặc chưa bị xóa');
+    await requireFolderAccess(userId, resource.folder_id, 'delete');
+
+    const versions = await db.selectFrom('resource_versions')
+      .innerJoin('storage_objects', 'storage_objects.id', 'resource_versions.storage_object_id')
+      .select(['storage_objects.id as object_id', 'storage_objects.object_key'])
+      .where('resource_versions.resource_id', '=', resourceId).execute();
+
+    const folder = await db.selectFrom('folders').select('workspace_id')
+      .where('id', '=', resource.folder_id).executeTakeFirstOrThrow();
+
+    await db.transaction().execute(async (trx) => {
+      await trx.updateTable('resources').set({ current_version_id: null })
+        .where('id', '=', resourceId).execute();
+      await trx.deleteFrom('resource_versions').where('resource_id', '=', resourceId).execute();
+      await trx.deleteFrom('resources').where('id', '=', resourceId).execute();
+      for (const v of versions) {
+        await trx.deleteFrom('storage_objects').where('id', '=', v.object_id).execute();
+      }
+      await trx.updateTable('storage_quotas')
+        .set({ used_bytes: sql`GREATEST(used_bytes - ${Number(resource.size_bytes)}, 0)` })
+        .where('scope_type', '=', 'workspace').where('scope_id', '=', folder.workspace_id)
+        .execute();
+      await trx.insertInto('audit_logs').values({
+        actor_id: userId, action: 'resource.permanent_delete',
+        target_type: 'resource', target_id: resourceId,
+      }).execute();
+    });
+
+    // Xóa file sau khi commit (không rollback được nên để cuối)
+    for (const v of versions) {
+      try { await this.storage.delete(v.object_key); }
+      catch (e) { console.error('Orphan file:', v.object_key, e); }
+    }
+  }
+}
+</file>
+
+<file path="src/modules/roles/roles.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { db } from '../../config/database.js';
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import { requireFunctionalPermission } from '../../shared/utils/permission.js';
+
+export class RolesController {
+  /**
+   * GET /api/v1/roles
+   * Lấy danh sách roles (cho admin)
+   */
+  list = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      await requireFunctionalPermission(req.user!.id, 'role.view');
+
+      const roles = await db.selectFrom('roles')
+        .select([
+          'roles.id',
+          'roles.key',
+          'roles.name',
+          'roles.is_system',
+        ])
+        .orderBy('roles.name')
+        .execute();
+
+      // Đếm số user có mỗi role
+      const userCounts = await db.selectFrom('user_roles')
+        .select([
+          'role_id',
+          db.fn.count<number>('user_id').as('user_count'),
+        ])
+        .groupBy('role_id')
+        .execute();
+
+      const countMap = new Map(userCounts.map(c => [c.role_id, Number(c.user_count)]));
+
+      res.json({
+        success: true,
+        data: roles.map(r => ({
+          ...r,
+          user_count: countMap.get(r.id) || 0,
+        })),
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+</file>
+
+<file path="src/modules/search/search.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { z } from 'zod';
+import {SearchService} from './search.service.js';
+
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import {validate} from '../../shared/middlewares/validate.middleware.js';
+
+
+// ============================================================
+// VALIDATION SCHEMAS
+// ============================================================
+const searchSchema = z.object({
+  query: z.object({
+    q: z.string().max(200, 'Từ khóa tối đa 200 ký tự').optional(),
+    type: z.enum(['file', 'folder', 'link', 'note']).optional(),
+    mimeType: z.string().optional(),
+    folderId: z.string().uuid().optional(),
+    createdBy: z.string().uuid().optional(),
+    dateFrom: z.string().datetime().optional(),
+    dateTo: z.string().datetime().optional(),
+    sizeMin: z.string().transform(Number).optional(),
+    sizeMax: z.string().transform(Number).optional(),
+    page: z.string().transform(Number).optional().default(1),
+    limit: z.string().transform(Number).optional().default(20),
+    sortBy: z.enum(['name', 'created_at', 'size_bytes', 'updated_at']).optional().default('created_at'),
+    order: z.enum(['asc', 'desc']).optional().default('desc'),
+  }),
+});
+
+const advancedSearchSchema = z.object({
+  body: z.object({
+    query: z.string().max(200).optional(),
+    filters: z.object({
+      types: z.array(z.enum(['file', 'folder', 'link', 'note'])).optional(),
+      mimeTypes: z.array(z.string()).optional(),
+      folderIds: z.array(z.string().uuid()).optional(),
+      createdBy: z.array(z.string().uuid()).optional(),
+      dateRange: z.object({
+        from: z.string().datetime().optional(),
+        to: z.string().datetime().optional(),
+      }).optional(),
+      sizeRange: z.object({
+        min: z.number().optional(),
+        max: z.number().optional(),
+      }).optional(),
+    }).optional(),
+    page: z.number().min(1).optional().default(1),
+    limit: z.number().min(1).max(100).optional().default(20),
+  }),
+});
+
+// ============================================================
+// CONTROLLER
+// ============================================================
+export class SearchController {
+  private searchService = new SearchService();
+
+  /**
+   * GET /api/v1/search
+   * Tìm kiếm cơ bản (query string)
+   */
+  search = [
+    validate(searchSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { q, type, folderId, page, limit } = req.query as any;
+        const result = await this.searchService.searchResources(req.user!.id, q ?? '', {
+          type, folderId,
+          page: page ? Number(page) : 1,
+          limit: limit ? Number(limit) : 20,
+        });
+        res.json({ success: true, ...result });   // ← dòng bị thiếu
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * POST /api/v1/search/advanced
+   * Tìm kiếm nâng cao (filter phức tạp)
+   */
+  advancedSearch = [
+    validate(advancedSearchSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const result = await this.searchService.advancedSearch(req.user!.id, req.body);
+        res.json({ success: true, ...result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * GET /api/v1/search/suggestions
+   * Gợi ý từ khóa tìm kiếm (autocomplete)
+   */
+  suggestions = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const { q } = req.query;
+        if (!q || typeof q !== 'string' || q.length < 2) {
+          return res.json({ success: true, data: [] });
+        }
+        const suggestions = await this.searchService.getSuggestions(req.user!.id, q);
+        res.json({ success: true, data: suggestions });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  /**
+   * GET /api/v1/search/recent
+   * Tài nguyên truy cập gần đây (của user)
+   */
+  recent = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        const limit = req.query.limit ? Number(req.query.limit) : 10;
+        const recent = await this.searchService.getRecentResources(req.user!.id, limit);
+        res.json({ success: true, data: recent });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/search/search.service.ts">
+import { sql } from 'kysely';
+import { db } from '../../config/database.js';
+import { accessibleResourceSql } from '../../shared/utils/permission.js';
+
+export class SearchService {
+  private base(userId: string) {
+    return db.selectFrom('resources')
+      .innerJoin('folders', 'folders.id', 'resources.folder_id')
+      .leftJoin('users', 'users.id', 'resources.created_by')
+      .select([
+        'resources.id', 'resources.name', 'resources.type', 'resources.mime_type',
+        'resources.size_bytes', 'resources.status', 'resources.created_at',
+        'resources.updated_at', 'resources.folder_id', 'resources.trashed_at',
+        'folders.name as folder_name', 'users.full_name as created_by_name',
+      ])
+      .where('resources.deleted_at', 'is', null)
+      .where('resources.status', '=', 'active')
+      .where(accessibleResourceSql(userId));
+  }
+
+  async searchResources(userId: string, query: string, options: {
+    page?: number; limit?: number; type?: string; folderId?: string;
+  }) {
+    const page = options.page || 1;
+    const limit = Math.min(options.limit || 20, 100);
+    let q = this.base(userId);
+
+    if (query) q = q.where('resources.name', 'ilike', `%${query}%`);
+    if (options.type) q = q.where('resources.type', '=', options.type);
+    if (options.folderId) {
+      q = q.where('folders.path', '<@',
+        sql`(SELECT path FROM folders WHERE id = ${options.folderId})` as any);
+    }
+
+    const rows = await q.orderBy('resources.created_at', 'desc')
+      .limit(limit).offset((page - 1) * limit).execute();
+    const total = rows.length === 0 ? 0 : Number((rows[0] as any).__total ?? rows.length);
+
+    return {
+      data: rows.map((r) => ({ ...r, size_bytes: Number(r.size_bytes) })),
+      pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
+    };
+  }
+
+  async advancedSearch(userId: string, payload: any) {
+    const page = payload.page || 1;
+    const limit = Math.min(payload.limit || 20, 100);
+    const f = payload.filters ?? {};
+    let q = this.base(userId);
+
+    if (payload.query) q = q.where('resources.name', 'ilike', `%${payload.query}%`);
+    if (f.types?.length) q = q.where('resources.type', 'in', f.types);
+    if (f.mimeTypes?.length) q = q.where('resources.mime_type', 'in', f.mimeTypes);
+    if (f.createdBy?.length) q = q.where('resources.created_by', 'in', f.createdBy);
+    if (f.folderIds?.length) {
+      q = q.where((eb) => eb.or(f.folderIds.map((id: string) =>
+        eb('folders.path', '<@', sql`(SELECT path FROM folders WHERE id = ${id})` as any))));
+    }
+    if (f.dateRange?.from) q = q.where('resources.created_at', '>=', new Date(f.dateRange.from));
+    if (f.dateRange?.to) q = q.where('resources.created_at', '<=', new Date(f.dateRange.to));
+    if (f.sizeRange?.min !== undefined) q = q.where('resources.size_bytes', '>=', f.sizeRange.min);
+    if (f.sizeRange?.max !== undefined) q = q.where('resources.size_bytes', '<=', f.sizeRange.max);
+
+    const rows = await q.orderBy('resources.created_at', 'desc')
+      .limit(limit).offset((page - 1) * limit).execute();
+
+    return {
+      data: rows.map((r) => ({ ...r, size_bytes: Number(r.size_bytes) })),
+      pagination: { page, limit, total: rows.length, totalPages: 1 },
+    };
+  }
+
+  async getSuggestions(userId: string, q: string) {
+    if (!q || q.length < 2) return [];
+    const rows = await this.base(userId)
+      .clearSelect().select('resources.name')
+      .where('resources.name', 'ilike', `%${q}%`)
+      .distinct().limit(10).execute();
+    return rows.map((r) => r.name);
+  }
+
+  /** Recent = resource chính user này đã view/download (từ audit_logs) */
+  async getRecentResources(userId: string, limit = 10) {
+    const rows = await db.selectFrom('audit_logs')
+      .innerJoin('resources', 'resources.id', 'audit_logs.target_id')
+      .innerJoin('folders', 'folders.id', 'resources.folder_id')
+      .select([
+        'resources.id', 'resources.name', 'resources.type', 'resources.mime_type',
+        'resources.size_bytes', 'resources.status', 'resources.created_at',
+        'resources.updated_at', 'resources.folder_id', 'resources.trashed_at',
+        'folders.name as folder_name',
+        sql<string>`MAX(audit_logs.occurred_at)`.as('last_accessed'),
+      ])
+      .where('audit_logs.actor_id', '=', userId)
+      .where('audit_logs.action', 'in', ['resource.view', 'resource.download'])
+      .where('audit_logs.target_type', '=', 'resource')
+      .where('resources.deleted_at', 'is', null)
+      .where('resources.status', '=', 'active')
+      .where(accessibleResourceSql(userId))
+      .groupBy(['resources.id', 'folders.name'])
+      .orderBy('last_accessed', 'desc')
+      .limit(limit).execute();
+
+    return rows.map((r) => ({ ...r, size_bytes: Number(r.size_bytes), created_by_name: null }));
+  }
+}
+</file>
+
+<file path="src/modules/system-settings/settings.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { z } from 'zod';
+import { SettingsService } from './settings.service.js';
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import { validate } from '../../shared/middlewares/validate.middleware.js';
+import { requireFunctionalPermission } from '../../shared/utils/permission.js';
+
+const updateSettingsSchema = z.object({
+  body: z.object({
+    settings: z.record(z.string(), z.any()),
+  }),
+});
+
+export class SettingsController {
+  private settingsService = new SettingsService();
+
+  getAll = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'system.settings');
+        const settings = await this.settingsService.getAllSettings();
+        res.json({ success: true, data: settings });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  getPublic = [
+    async (req: any, res: Response, next: NextFunction) => {
+      try {
+        const settings = await this.settingsService.getPublicSettings();
+        res.json({ success: true, data: settings });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  update = [
+    validate(updateSettingsSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'system.settings');
+        const result = await this.settingsService.updateSettings(
+          req.body.settings,
+          req.user!.id
+        );
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  getByKey = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'system.settings');
+        const setting = await this.settingsService.getSettingByKey(req.params.key as string);
+        res.json({ success: true, data: setting });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/system-settings/settings.service.ts">
+import { db } from '../../config/database.js';
+import { AppError } from '../../shared/middlewares/error.middleware.js';
+
+const UPDATABLE_KEYS = new Set([
+  'upload.max_file_size_bytes',
+  'upload.allowed_extensions',
+  'upload.blocked_extensions',
+  'quota.default_user_bytes',
+  'quota.default_department_bytes',
+  'trash.retention_days',
+  'auth.max_failed_logins',
+  'auth.lockout_minutes',
+  'auth.refresh_token_ttl_days',
+  'sharing.max_link_expiry_days',
+]);
+
+const PUBLIC_KEYS = new Set([
+  'upload.max_file_size_bytes',
+  'upload.allowed_extensions',
+  'upload.blocked_extensions',
+]);
+
+export class SettingsService {
+  async getAllSettings() {
+    const settings = await db.selectFrom('system_settings' as any)
+      .select(['key', 'value', 'description', 'updated_at'] as any)
+      .orderBy('key')
+      .execute() as any[];
+
+    const result: Record<string, any> = {};
+    for (const s of settings) {
+      result[s.key] = {
+        value: s.value,
+        description: s.description,
+        updatedAt: s.updated_at,
+      };
+    }
+    return result;
+  }
+
+  async getPublicSettings() {
+    const settings = await db.selectFrom('system_settings' as any)
+      .select(['key', 'value'] as any)
+      .execute() as any[];
+
+    const result: Record<string, any> = {};
+    for (const s of settings) {
+      if (PUBLIC_KEYS.has(s.key)) {
+        result[s.key] = s.value;
+      }
+    }
+    return result;
+  }
+
+  async getSettingByKey(key: string) {
+    const setting = await db.selectFrom('system_settings' as any)
+      .select(['key', 'value', 'description', 'updated_at'] as any)
+      .where('key', '=', key)
+      .executeTakeFirst() as any;
+
+    if (!setting) throw new AppError(404, 'Setting không tồn tại');
+    return setting;
+  }
+
+  async updateSettings(settings: Record<string, any>, updatedBy: string) {
+    const invalidKeys = Object.keys(settings).filter((k) => !UPDATABLE_KEYS.has(k));
+    if (invalidKeys.length > 0) {
+      throw new AppError(400, `Các key không hợp lệ: ${invalidKeys.join(', ')}`);
+    }
+
+    this.validateSettingsValues(settings);
+
+    const updatedKeys: string[] = [];
+    const changes: Record<string, { old: any; new: any }> = {};
+
+    for (const [key, value] of Object.entries(settings)) {
+      const oldSetting = await db.selectFrom('system_settings' as any)
+        .select('value' as any)
+        .where('key', '=', key)
+        .executeTakeFirst();
+
+      if (!oldSetting) {
+        throw new AppError(404, `Setting '${key}' không tồn tại`);
+      }
+
+      await db.updateTable('system_settings' as any)
+        .set({
+          value: JSON.stringify(value) as any,
+          updated_by: updatedBy,
+        } as any)
+        .where('key', '=', key)
+        .execute();
+
+      updatedKeys.push(key);
+      changes[key] = { old: (oldSetting as any).value, new: value };
+    }
+
+    await db.insertInto('audit_logs').values({
+      actor_id: updatedBy,
+      action: 'system.settings.update',
+      target_type: 'system_settings',
+      metadata: JSON.stringify({ changes, updatedKeys }) as any,
+    }).execute();
+
+    return { updated: updatedKeys.length, keys: updatedKeys };
+  }
+
+  private validateSettingsValues(settings: Record<string, any>) {
+    if (settings['upload.max_file_size_bytes'] !== undefined) {
+      const val = Number(settings['upload.max_file_size_bytes']);
+      if (isNaN(val) || val < 1024 * 1024 || val > 1024 * 1024 * 1024) {
+        throw new AppError(400, 'Kích thước file tối đa phải từ 1MB đến 1GB');
+      }
+    }
+
+    if (settings['upload.allowed_extensions'] !== undefined) {
+      if (!Array.isArray(settings['upload.allowed_extensions'])) {
+        throw new AppError(400, 'Danh sách extension cho phép phải là array');
+      }
+    }
+
+    if (settings['quota.default_user_bytes'] !== undefined) {
+      const val = Number(settings['quota.default_user_bytes']);
+      if (isNaN(val) || val < 100 * 1024 * 1024) {
+        throw new AppError(400, 'Quota mặc định phải ít nhất 100MB');
+      }
+    }
+
+    if (settings['trash.retention_days'] !== undefined) {
+      const val = Number(settings['trash.retention_days']);
+      if (isNaN(val) || val < 1 || val > 365) {
+        throw new AppError(400, 'Thời gian giữ thùng rác phải từ 1-365 ngày');
+      }
+    }
+
+    if (settings['auth.max_failed_logins'] !== undefined) {
+      const val = Number(settings['auth.max_failed_logins']);
+      if (isNaN(val) || val < 3 || val > 20) {
+        throw new AppError(400, 'Số lần đăng nhập sai tối đa phải từ 3-20');
+      }
+    }
+
+    if (settings['auth.lockout_minutes'] !== undefined) {
+      const val = Number(settings['auth.lockout_minutes']);
+      if (isNaN(val) || val < 5 || val > 1440) {
+        throw new AppError(400, 'Thời gian khóa phải từ 5-1440 phút');
+      }
+    }
+  }
+}
+</file>
+
+<file path="src/modules/users/me.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { db } from '../../config/database.js';
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import { AppError } from '../../shared/middlewares/error.middleware.js';
+
+export class MeController {
+  /**
+   * GET /api/v1/me
+   * Lấy thông tin profile của user hiện tại
+   */
+  getProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user!.id;
+
+      const user = await db.selectFrom('users')
+        .leftJoin('positions' as any, 'positions.id', 'users.position_id')
+        .select([
+          'users.id',
+          'users.email',
+          'users.full_name',
+          'users.status',
+          'users.email_verified_at',
+          'users.last_login_at',
+          'users.created_at',
+          'users.position_id',
+          'positions.name as position_name',
+          'positions.level as position_level',
+        ])
+        .where('users.id', '=', userId)
+        .where('users.deleted_at', 'is', null)
+        .executeTakeFirst();
+
+      if (!user) throw new AppError(404, 'User không tồn tại');
+
+      // Lấy departments
+      const departments = await db.selectFrom('department_members')
+        .innerJoin('departments', 'departments.id', 'department_members.department_id')
+        .select([
+          'departments.id',
+          'departments.name',
+          'departments.code',
+          'department_members.is_manager',
+        ])
+        .where('department_members.user_id', '=', userId)
+        .execute();
+
+      // Lấy roles
+      const roles = await db.selectFrom('user_roles')
+        .innerJoin('roles', 'roles.id', 'user_roles.role_id')
+        .select([
+          'roles.id',
+          'roles.key',
+          'roles.name',
+          'user_roles.scope_type',
+        ])
+        .where('user_roles.user_id', '=', userId)
+        .execute();
+
+      // Lấy danh sách thiết bị đang đăng nhập (active refresh tokens)
+      const activeSessions = await db.selectFrom('refresh_tokens')
+        .select([
+          'refresh_tokens.id',
+          'refresh_tokens.ip',
+          'refresh_tokens.user_agent',
+          'refresh_tokens.created_at',
+          'refresh_tokens.expires_at',
+        ])
+        .where('refresh_tokens.user_id', '=', userId)
+        .where('refresh_tokens.revoked_at', 'is', null)
+        .where('refresh_tokens.expires_at', '>', new Date())
+        .orderBy('refresh_tokens.created_at', 'desc')
+        .execute();
+
+      res.json({
+        success: true,
+        data: {
+          ...user,
+          departments,
+          roles,
+          activeSessions: activeSessions.map(s => ({
+            id: s.id,
+            ip: s.ip,
+            userAgent: s.user_agent,
+            createdAt: s.created_at,
+            expiresAt: s.expires_at,
+            isCurrent: false, // Sẽ đánh dấu ở frontend
+          })),
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * DELETE /api/v1/me/sessions/:sessionId
+   * Revoke 1 session cụ thể
+   */
+  revokeSession = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user!.id;
+      const sessionId = req.params.sessionId as string;
+
+      const result = await db.updateTable('refresh_tokens')
+        .set({ revoked_at: new Date() })
+        .where('id', '=', sessionId)
+        .where('user_id', '=', userId)
+        .where('revoked_at', 'is', null)
+        .executeTakeFirst();
+
+      if (result.numUpdatedRows.toString() === '0') {
+        throw new AppError(404, 'Session không tồn tại');
+      }
+
+      // Audit log
+      await db.insertInto('audit_logs').values({
+        actor_id: userId,
+        action: 'auth.revoke_session',
+        target_type: 'refresh_token',
+        target_id: sessionId,
+      }).execute();
+
+      res.json({ success: true, message: 'Đã đăng xuất thiết bị' });
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+</file>
+
+<file path="src/modules/users/user.controller.ts">
+import type { Response, NextFunction } from 'express';
+import { z } from 'zod';
+import {UserService} from './user.service.js';
+
+import type { AuthRequest } from '../../shared/middlewares/auth.middleware.js';
+import {validate} from '../../shared/middlewares/validate.middleware.js';
+
+import {requireFunctionalPermission} from '../../shared/utils/permission.js';
+
+
+const createUserSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    password: z.string().min(6),
+    fullName: z.string().min(1),
+    positionId: z.string().uuid().optional(),
+    departmentIds: z.array(z.string().uuid()).optional(),
+    roleIds: z.array(z.string().uuid()).optional(),
+  }),
+});
+
+const updateUserSchema = z.object({
+  body: z.object({
+    fullName: z.string().min(1).optional(),
+    positionId: z.string().uuid().nullable().optional(),
+    status: z.enum(['active', 'suspended', 'disabled']).optional(),
+  }),
+});
+
+const listUsersSchema = z.object({
+  query: z.object({
+    page: z.string().transform(Number).optional(),
+    limit: z.string().transform(Number).optional(),
+    search: z.string().optional(),
+    status: z.string().optional(),
+    departmentId: z.string().uuid().optional(),
+  }),
+});
+
+export class UserController {
+  private userService = new UserService();
+  updateRoles = [
+    validate(z.object({ body: z.object({ roleIds: z.array(z.string().uuid()).min(1) }) })),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'user.assign_role');
+        const result = await this.userService.updateUserRoles(
+          req.params.userId as string, req.body.roleIds, req.user!.id);
+        res.json({ success: true, data: result });
+      } catch (e) { next(e); }
+    },
+  ];
+  list = [
+    validate(listUsersSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'user.view');
+        const result = await this.userService.listUsers(req.query);
+        res.json({ success: true, ...result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  getById = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'user.view');
+        const result = await this.userService.getUserById(req.params.userId as string);
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  create = [
+    validate(createUserSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'user.create');
+        const result = await this.userService.createUser(req.body);
+        res.status(201).json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  update = [
+    validate(updateUserSchema),
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'user.update');
+        const result = await this.userService.updateUser(req.params.userId as string, req.body);
+        res.json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+
+  delete = [
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      try {
+        await requireFunctionalPermission(req.user!.id, 'user.delete');
+        await this.userService.deleteUser(req.params.userId as string);
+        res.json({ success: true, message: 'User đã được xóa' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  ];
+}
+</file>
+
+<file path="src/modules/users/user.service.ts">
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import {db} from '../../config/database.js';
+
+import {AppError} from '../../shared/middlewares/error.middleware.js';
+
+import { sql } from 'kysely';
+
+export class UserService {
+    async updateUserRoles(userId: string, roleIds: string[], actorId: string) {
+    const user = await db.selectFrom('users').select('id')
+      .where('id', '=', userId).where('deleted_at', 'is', null).executeTakeFirst();
+    if (!user) throw new AppError(404, 'User không tồn tại');
+    if (roleIds.length === 0) throw new AppError(400, 'Phải giữ ít nhất 1 vai trò');
+
+    await db.transaction().execute(async (trx) => {
+      await trx.deleteFrom('user_roles')
+        .where('user_id', '=', userId).where('scope_type', '=', 'global').execute();
+      await trx.insertInto('user_roles').values(roleIds.map((roleId) => ({
+        id: crypto.randomUUID(), user_id: userId, role_id: roleId,
+        scope_type: 'global', granted_by: actorId,
+      }))).execute();
+      // Thu hồi session để quyền mới có hiệu lực ngay
+      await trx.updateTable('refresh_tokens').set({ revoked_at: new Date() })
+        .where('user_id', '=', userId).where('revoked_at', 'is', null).execute();
+      await trx.insertInto('audit_logs').values({
+        actor_id: actorId, action: 'user.assign_role', target_type: 'user',
+        target_id: userId, metadata: JSON.stringify({ roleIds }),
+      }).execute();
+    });
+    return this.getUserById(userId);
+  }
+  async listUsers(options: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+    departmentId?: string;
+  }) {
+    const page = options.page || 1;
+    const limit = Math.min(options.limit || 20, 100);
+    const offset = (page - 1) * limit;
+
+    // Hàm tạo điều kiện tìm kiếm
+    const buildSearchConditions = (eb: import('kysely').ExpressionBuilder<any, any>) =>
+      eb.or([
+        eb('users.email', 'ilike', `%${options.search}%`),
+        eb('users.full_name', 'ilike', `%${options.search}%`),
+      ]);
+
+    // Khởi tạo query gốc
+    const query = db.selectFrom('users')
+      .leftJoin('positions' as any, 'positions.id', 'users.position_id')
+      .leftJoin('department_members', 'department_members.user_id', 'users.id')
+      .leftJoin('departments', 'departments.id', 'department_members.department_id')
+      .select([
+        'users.id',
+        'users.email',
+        'users.full_name',
+        'users.status',
+        'users.email_verified_at',
+        'users.last_login_at',
+        'users.created_at',
+        'users.position_id',
+        'positions.name as position_name',
+        'positions.level as position_level',
+        'departments.name as department_name',
+      ])
+      .where('users.deleted_at', 'is', null);
+
+    // Build conditions
+    const conditions: any[] = [];
+    if (options.search) {
+      conditions.push(buildSearchConditions);
+    }
+
+    // Apply all conditions
+    let finalQuery = query;
+    for (const cond of conditions) {
+      finalQuery = finalQuery.where(cond);
+    }
+
+    // Apply additional filters
+    if (options.status) {
+      finalQuery = finalQuery.where('users.status', '=', options.status);
+    }
+
+    if (options.departmentId) {
+      finalQuery = finalQuery.where('department_members.department_id', '=', options.departmentId);
+    }
+
+    const users = await finalQuery
+      .orderBy('users.created_at', 'desc')
+      .limit(limit)
+      .offset(offset)
+      .execute();
+
+    // Count total
+    const countResult = await db.selectFrom('users')
+      .select(db.fn.count<number>('id').as('total'))
+      .where('deleted_at', 'is', null)
+      .executeTakeFirstOrThrow();
+
+    return {
+      data: users,
+      pagination: {
+        page,
+        limit,
+        total: Number(countResult.total),
+        totalPages: Math.ceil(Number(countResult.total) / limit),
+      },
+    };
+  }
+
+  async getUserById(userId: string) {
+    const user = await db.selectFrom('users')
+      .leftJoin('positions' as any, 'positions.id', 'users.position_id')
+      .select([
+        'users.id',
+        'users.email',
+        'users.full_name',
+        'users.status',
+        'users.email_verified_at',
+        'users.last_login_at',
+        'users.created_at',
+        'users.position_id',
+        'positions.name as position_name',
+        'positions.level as position_level',
+      ])
+      .where('users.id', '=', userId)
+      .where('users.deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!user) throw new AppError(404, 'User không tồn tại');
+
+    // Lấy departments
+    const departments = await db.selectFrom('department_members')
+      .innerJoin('departments', 'departments.id', 'department_members.department_id')
+      .select([
+        'departments.id',
+        'departments.name',
+        'departments.code',
+        'department_members.is_manager',
+      ])
+      .where('department_members.user_id', '=', userId)
+      .execute();
+
+    // Lấy roles
+    const roles = await db.selectFrom('user_roles')
+      .innerJoin('roles', 'roles.id', 'user_roles.role_id')
+      .select([
+        'roles.id',
+        'roles.key',
+        'roles.name',
+        'user_roles.scope_type',
+        'user_roles.scope_id',
+      ])
+      .where('user_roles.user_id', '=', userId)
+      .execute();
+
+    return { ...user, departments, roles };
+  }
+
+  async createUser(data: {
+    email: string;
+    password: string;
+    fullName: string;
+    positionId?: string;
+    departmentIds?: string[];
+    roleIds?: string[];
+  }) {
+    // Kiểm tra email đã tồn tại chưa
+    const existing = await db.selectFrom('users')
+      .select('id')
+      .where('email', '=', data.email)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (existing) throw new AppError(409, 'Email đã được sử dụng');
+
+    const userId = crypto.randomUUID();
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    await db.transaction().execute(async (trx) => {
+      // Tạo user
+      await trx.insertInto('users' as any)
+        .values({
+          id: userId,
+          email: data.email,
+          password_hash: passwordHash,
+          full_name: data.fullName,
+          position_id: data.positionId,
+          status: 'active',
+          email_verified_at: new Date(),
+        } as any)
+        .execute();
+
+      // Gán departments
+      if (data.departmentIds?.length) {
+        await trx.insertInto('department_members')
+          .values(data.departmentIds.map(deptId => ({
+            department_id: deptId,
+            user_id: userId,
+            is_manager: false,
+          })))
+          .execute();
+      }
+
+      // Gán roles
+      if (data.roleIds?.length) {
+        await trx.insertInto('user_roles')
+          .values(data.roleIds.map(roleId => ({
+            id: crypto.randomUUID(),
+            user_id: userId,
+            role_id: roleId,
+            scope_type: 'global',
+          })))
+          .execute();
+      }
+
+      // Audit log
+      await trx.insertInto('audit_logs')
+        .values({
+          action: 'user.create',
+          target_type: 'user',
+          target_id: userId,
+          metadata: JSON.stringify({ email: data.email, fullName: data.fullName }),
+        })
+        .execute();
+    });
+
+    return this.getUserById(userId);
+  }
+
+  async updateUser(userId: string, data: {
+    fullName?: string;
+    positionId?: string;
+    status?: string;
+  }) {
+    const user = await db.selectFrom('users')
+      .select('id')
+      .where('id', '=', userId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!user) throw new AppError(404, 'User không tồn tại');
+
+    await db.updateTable('users')
+      .set({
+        ...(data.fullName && { full_name: data.fullName }),
+        ...(data.positionId !== undefined && { position_id: data.positionId }),
+        ...(data.status && { status: data.status }),
+      })
+      .where('id', '=', userId)
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        action: 'user.update',
+        target_type: 'user',
+        target_id: userId,
+        metadata: JSON.stringify(data),
+      })
+      .execute();
+
+    return this.getUserById(userId);
+  }
+
+  async deleteUser(userId: string) {
+    const user = await db.selectFrom('users')
+      .select('id')
+      .where('id', '=', userId)
+      .where('deleted_at', 'is', null)
+      .executeTakeFirst();
+
+    if (!user) throw new AppError(404, 'User không tồn tại');
+
+    // Soft delete
+    await db.updateTable('users')
+      .set({ deleted_at: new Date() })
+      .where('id', '=', userId)
+      .execute();
+
+    // Revoke all refresh tokens
+    await db.updateTable('refresh_tokens')
+      .set({ revoked_at: new Date() })
+      .where('user_id', '=', userId)
+      .where('revoked_at', 'is', null)
+      .execute();
+
+    // Audit log
+    await db.insertInto('audit_logs')
+      .values({
+        action: 'user.delete',
+        target_type: 'user',
+        target_id: userId,
+      })
+      .execute();
+  }
+}
+</file>
+
+<file path="src/shared/middlewares/auth.middleware.ts">
+import type { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import {env} from '../../config/env.js';
+
+import {AppError} from './error.middleware.js';
+
+
+export interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return next(new AppError(401, 'Unauthorized: Missing token'));
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = (jwt as any).verify(token, (env as any).JWT_ACCESS_SECRET);
+    req.user = { id: decoded.id, email: decoded.email, role: decoded.role };
+    next();
+  } catch (error) {
+    return next(new AppError(401, 'Unauthorized: Invalid or expired token'));
+  }
+};
+</file>
+
+<file path="src/shared/middlewares/error.middleware.ts">
+import type { Request, Response, NextFunction } from 'express';
+import {env} from '../../config/env.js';
+
+
+export class AppError extends Error {
+  public statusCode: number;
+  public details?: any;
+
+  constructor(statusCode: number, message: string, details?: any) {
+    super(message);
+    this.statusCode = statusCode;
+    this.details = details;
+    this.name = 'AppError';
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+  let statusCode = err.statusCode || 500;
+  let message = err.message || 'Internal Server Error';
+  let details = err.details;
+
+  // Xử lý các lỗi đặc biệt
+  if (err.name === 'MulterError') {
+    statusCode = 400;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'File quá lớn (tối đa 100MB)';
+    } else {
+      message = `Upload error: ${err.message}`;
+    }
+  }
+
+  if (err.code === '23505') { // PostgreSQL unique violation
+    statusCode = 409;
+    message = 'Dữ liệu đã tồn tại';
+  }
+
+  if (err.code === '23503') { // PostgreSQL foreign key violation
+    statusCode = 400;
+    message = 'Dữ liệu tham chiếu không tồn tại';
+  }
+
+  // Log lỗi
+  console.error(`[Error] ${new Date().toISOString()} - ${statusCode} - ${message}`);
+  if (env.NODE_ENV === 'development') {
+    console.error(err.stack);
+  }
+
+  // Response
+  res.status(statusCode).json({
+    success: false,
+    error: {
+      message,
+      ...(details && { details }),
+      ...(env.NODE_ENV === 'development' && { stack: err.stack }),
+    },
+  });
+};
+</file>
+
+<file path="src/shared/middlewares/rateLimit.middleware.ts">
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
+
+// Login: 5 requests/15 phút/IP
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { 
+    success: false, 
+    error: { message: 'Quá nhiều lần đăng nhập. Vui lòng thử lại sau 15 phút.' } 
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Forgot password: 3 requests/15 phút/IP
+export const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  message: { 
+    success: false, 
+    error: { message: 'Quá nhiều yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau 15 phút.' } 
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Upload: 20 requests/phút/user
+export const uploadLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => {
+    if ((req as any).user?.id) return (req as any).user.id;
+    return ipKeyGenerator(req.ip!);
+  },
+  message: { 
+    success: false, 
+    error: { message: 'Quá nhiều lần upload. Vui lòng thử lại sau.' } 
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// API chung: 100 requests/phút/IP
+export const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: { 
+    success: false, 
+    error: { message: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' } 
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+</file>
+
+<file path="src/shared/middlewares/validate.middleware.ts">
+import type { Request, Response, NextFunction } from 'express';
+import type { ZodSchema } from 'zod';
+import { ZodError } from 'zod';
+import { AppError } from './error.middleware.js';
+
+export const validate = (schema: ZodSchema) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      const parsed = schema.parse({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      }) as { body?: any; query?: any; params?: any };
+
+      if (parsed.body !== undefined) req.body = parsed.body;
+      // Express 5: req.query là getter-only → mutate object, không gán lại
+      if (parsed.query !== undefined) Object.assign(req.query, parsed.query);
+      if (parsed.params !== undefined) Object.assign(req.params, parsed.params);
+
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const details = error.issues.map((i) => ({
+          field: i.path.join('.'),
+          message: i.message,
+        }));
+        return next(new AppError(400, 'Validation failed', details));
+      }
+      next(error);
+    }
+  };
+};
+</file>
+
+<file path="src/shared/services/email.service.ts">
+import nodemailer from 'nodemailer';
+import {env} from '../../config/env.js';
+
+
+const transporter = nodemailer.createTransport({
+  host: env.SMTP_HOST || 'smtp.gmail.com',
+  port: Number(env.SMTP_PORT) || 587,
+  secure: false,
+  auth: {
+    user: env.SMTP_USER,
+    pass: env.SMTP_PASS,
+  },
+});
+
+export class EmailService {
+  async sendPasswordResetEmail(email: string, resetLink: string) {
+    try {
+      await transporter.sendMail({
+        from: `"ACME Corp" <${env.SMTP_USER}>`,
+        to: email,
+        subject: 'Đặt lại mật khẩu của bạn',
+        html: `
+          <h2>Yêu cầu đặt lại mật khẩu</h2>
+          <p>Bạn đã yêu cầu đặt lại mật khẩu. Click vào liên kết bên dưới để tiếp tục:</p>
+          <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">Đặt lại mật khẩu</a>
+          <p>Liên kết này sẽ hết hạn sau 1 giờ.</p>
+          <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+        `,
+      });
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+    }
+  }
+
+  async sendInvitationEmail(email: string, invitationLink: string, inviterName: string) {
+    try {
+      await transporter.sendMail({
+        from: `"ACME Corp" <${env.SMTP_USER}>`,
+        to: email,
+        subject: `Bạn được mời tham gia ACME Corp`,
+        html: `
+          <h2>Lời mời tham gia hệ thống</h2>
+          <p>${inviterName} đã mời bạn tham gia hệ thống quản lý tài nguyên của ACME Corp.</p>
+          <a href="${invitationLink}" style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">Chấp nhận lời mời</a>
+          <p>Liên kết này sẽ hết hạn sau 7 ngày.</p>
+        `,
+      });
+    } catch (error) {
+      console.error('Failed to send invitation email:', error);
+    }
+  }
+}
+</file>
+
+<file path="src/shared/storage/local.driver.ts">
+// src/shared/storage/local.driver.ts
+
+import fs from 'fs/promises';
+import fsSync from 'fs';
+import path from 'path';
+import { Readable } from 'stream';
+import crypto from 'crypto';
+import type { StorageDriver, StorageFile, UploadOptions } from './storage.interface.js';
+
+export class LocalDriver implements StorageDriver {
+  private readonly basePath: string;
+  private readonly publicBaseUrl: string;
+
+  constructor(basePath: string, publicBaseUrl: string = '/files') {
+    this.basePath = path.resolve(basePath);
+    this.publicBaseUrl = publicBaseUrl;
+    // Đảm bảo thư mục tồn tại
+    fsSync.mkdirSync(this.basePath, { recursive: true });
+  }
+
+  private getFullPath(key: string): string {
+    // Chống path traversal attack
+    const normalized = path.normalize(key);
+    // Kiểm tra tên file chỉ chứa ký tự hợp lệ (không chứa ../, \\, //)
+    if (/[.][.][/|\\]|^\.\.[\\/]/.test(normalized)) {
+      throw new Error('Invalid key: path traversal detected');
+    }
+    const fullPath = path.join(this.basePath, normalized);
+    if (!fullPath.startsWith(this.basePath)) {
+      throw new Error('Invalid key: path traversal detected');
+    }
+    return fullPath;
+  }
+
+  async upload(
+    key: string,
+    data: Buffer | NodeJS.ReadableStream,
+    options: UploadOptions = {}
+  ): Promise<StorageFile> {
+    const fullPath = this.getFullPath(key);
+    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+
+    const buffer = Buffer.isBuffer(data)
+      ? data
+      : await this.streamToBuffer(data);
+
+    await fs.writeFile(fullPath, buffer);
+
+    const checksum = crypto.createHash('sha256').update(buffer).digest('hex');
+    const stat = await fs.stat(fullPath);
+
+    return {
+      key,
+      originalName: path.basename(key),
+      mimeType: options.metadata?.mimeType || 'application/octet-stream',
+      size: stat.size,
+      checksum,
+      metadata: options.metadata,
+    };
+  }
+
+  async download(key: string): Promise<Buffer> {
+    const fullPath = this.getFullPath(key);
+    return await fs.readFile(fullPath);
+  }
+
+  async getStream(key: string): Promise<NodeJS.ReadableStream> {
+    const fullPath = this.getFullPath(key);
+    return fsSync.createReadStream(fullPath);
+  }
+
+  async delete(key: string): Promise<void> {
+    const fullPath = this.getFullPath(key);
+    try {
+      await fs.unlink(fullPath);
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+    }
+  }
+
+  async deleteMany(keys: string[]): Promise<void> {
+    await Promise.all(keys.map((k) => this.delete(k)));
+  }
+
+  async exists(key: string): Promise<boolean> {
+    const fullPath = this.getFullPath(key);
+    try {
+      await fs.access(fullPath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async getMetadata(key: string): Promise<StorageFile> {
+    const fullPath = this.getFullPath(key);
+    const stat = await fs.stat(fullPath);
+    return {
+      key,
+      originalName: path.basename(key),
+      mimeType: 'application/octet-stream',
+      size: stat.size,
+      metadata: undefined,
+    };
+  }
+
+  async getDownloadUrl(key: string): Promise<string> {
+    // Với local: trả về URL qua Express static middleware
+    return `${this.publicBaseUrl}/${key}`;
+  }
+
+  async copy(sourceKey: string, destKey: string): Promise<void> {
+    const src = this.getFullPath(sourceKey);
+    const dest = this.getFullPath(destKey);
+    await fs.mkdir(path.dirname(dest), { recursive: true });
+    await fs.copyFile(src, dest);
+  }
+
+  async move(sourceKey: string, destKey: string): Promise<void> {
+    const src = this.getFullPath(sourceKey);
+    const dest = this.getFullPath(destKey);
+    await fs.mkdir(path.dirname(dest), { recursive: true });
+    await fs.rename(src, dest);
+  }
+
+  private streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
+      stream.on('error', reject);
+    });
+  }
+}
+</file>
+
+<file path="src/shared/storage/storage.factory.ts">
+// src/shared/storage/storage.factory.ts
+
+import type { StorageDriver } from './storage.interface.js';
+import {LocalDriver} from './local.driver.js';
+
+import {env} from '../../config/env.js';
+
+// import { S3Driver } from './s3.driver.js'; // Tương lai
+
+export type StorageDriverType = 'local' | 's3' | 'r2';
+
+let currentDriver: StorageDriver | null = null;
+
+export function initStorageDriver(type: StorageDriverType = 'local'): StorageDriver {
+  if (currentDriver) return currentDriver;
+
+  switch (type) {
+    case 'local':
+      currentDriver = new LocalDriver(
+        env.STORAGE_LOCAL_PATH,
+        env.STORAGE_PUBLIC_URL
+      );
+      break;
+    // case 's3':
+    //   currentDriver = new S3Driver({ ... });
+    //   break;
+    default:
+      throw new Error(`Unsupported storage driver: ${type}`);
+  }
+
+  return currentDriver;
+}
+
+export function getStorageDriver(): StorageDriver {
+  if (!currentDriver) {
+    throw new Error('Storage driver not initialized. Call initStorageDriver() first.');
+  }
+  return currentDriver;
+}
+</file>
+
+<file path="src/shared/storage/storage.interface.ts">
+// src/shared/storage/storage.interface.ts
+
+export interface StorageFile {
+  key: string;           // Định danh duy nhất (ví dụ: "resources/2026/11/abc123.pdf")
+  originalName: string;  // Tên gốc do user upload
+  mimeType: string;
+  size: number;          // bytes
+  checksum?: string;     // SHA-256
+  metadata: Record<string, string> | undefined;
+}
+
+export interface UploadOptions {
+  folder?: string;       // Thư mục logic trong storage
+  metadata?: Record<string, string>;
+}
+
+export interface StorageDriver {
+  /** Upload file từ buffer/stream */
+  upload(key: string, data: Buffer | NodeJS.ReadableStream, options?: UploadOptions): Promise<StorageFile>;
+
+  /** Download file về buffer */
+  download(key: string): Promise<Buffer>;
+
+  /** Tạo stream để đọc file (dùng cho res.pipe) */
+  getStream(key: string): Promise<NodeJS.ReadableStream>;
+
+  /** Xóa file */
+  delete(key: string): Promise<void>;
+
+  /** Xóa nhiều file */
+  deleteMany(keys: string[]): Promise<void>;
+
+  /** Kiểm tra file tồn tại */
+  exists(key: string): Promise<boolean>;
+
+  /** Lấy thông tin file */
+  getMetadata(key: string): Promise<StorageFile>;
+
+  /** Tạo URL download (presigned URL với S3, hoặc URL trực tiếp với local) */
+  getDownloadUrl(key: string, expiresInSeconds?: number): Promise<string>;
+
+  /** Copy file */
+  copy(sourceKey: string, destKey: string): Promise<void>;
+
+  /** Move file */
+  move(sourceKey: string, destKey: string): Promise<void>;
+}
+</file>
+
+<file path="src/shared/utils/fileValidator.ts">
+import { fileTypeFromBuffer } from 'file-type';
+import path from 'path';
+import { AppError } from '../middlewares/error.middleware.js';
+
+const BINARY_WHITELIST = new Set([
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'application/zip',
+]);
+const TEXT_EXT: Record<string, string> = {
+  '.json': 'application/json', '.txt': 'text/plain',
+  '.csv': 'text/csv', '.md': 'text/markdown',
+};
+const BLOCKED_EXT = new Set(['.exe', '.bat', '.cmd', '.sh', '.msi', '.dll', '.scr', '.com']);
+
+export async function validateFile(file: Express.Multer.File) {
+  if (file.size === 0) throw new AppError(400, 'File rỗng');
+  if (file.size > 100 * 1024 * 1024) throw new AppError(413, 'File quá lớn (tối đa 100MB)');
+
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (BLOCKED_EXT.has(ext)) throw new AppError(400, `Định dạng bị chặn: ${ext}`);
+
+  const detected = await fileTypeFromBuffer(file.buffer);
+
+  if (!detected) {
+    // File text: chỉ chấp nhận nếu extension nằm trong whitelist text
+    if (TEXT_EXT[ext]) return { mime: TEXT_EXT[ext], ext: ext.slice(1) };
+    throw new AppError(400, 'Không xác định được loại file hoặc loại file không được phép');
+  }
+  if (BLOCKED_EXT.has(`.${detected.ext}`)) throw new AppError(400, 'File thực thi bị chặn');
+  if (!BINARY_WHITELIST.has(detected.mime)) {
+    throw new AppError(400, `Loại file không được phép: ${detected.mime}`);
+  }
+  return detected;
+}
+</file>
+
+<file path="src/shared/utils/permission.ts">
+import {db} from '../../config/database.js';
+
+import {AppError} from '../middlewares/error.middleware.js';
+import { sql } from 'kysely';
+
+/**
+ * Kiểm tra user có quyền chức năng (functional permission) hay không.
+ * Ví dụ: 'resource.upload', 'folder.create'
+ */
+export async function hasFunctionalPermission(
+  userId: string,
+  permissionCode: string,
+  scope?: { type: 'global' | 'department' | 'workspace'; id: string }
+): Promise<boolean> {
+  let query = db.selectFrom('user_roles')
+    .innerJoin('role_permissions', 'role_permissions.role_id', 'user_roles.role_id')
+    .select('role_permissions.permission_code')
+    .where('user_roles.user_id', '=', userId)
+    .where('role_permissions.permission_code', '=', permissionCode);
+
+  if (scope) {
+    query = query.where((eb) => eb.or([
+      eb('user_roles.scope_type', '=', 'global'),
+      eb.and([
+        eb('user_roles.scope_type', '=', scope.type),
+        eb('user_roles.scope_id', '=', scope.id)
+      ])
+    ]));
+  } else {
+    query = query.where('user_roles.scope_type', '=', 'global');
+  }
+
+  const result = await query.executeTakeFirst();
+  return !!result;
+}
+
+/**
+ * Throw 403 nếu không có quyền chức năng
+ */
+export async function requireFunctionalPermission(
+  userId: string,
+  permissionCode: string,
+  scope?: { type: 'global' | 'department' | 'workspace'; id: string }
+) {
+  const has = await hasFunctionalPermission(userId, permissionCode, scope);
+  if (!has) {
+    throw new AppError(403, `Bạn không có quyền '${permissionCode}'`);
+  }
+}
+
+/**
+ * Kiểm tra user có quyền truy cập vào một FOLDER cụ thể hay không.
+ * Logic:
+ *  - Admin toàn cục → OK
+ *  - Folder thuộc workspace công ty → mọi user active đều OK (Phase 1)
+ *  - Folder thuộc workspace phòng ban → user phải là thành viên phòng ban
+ *  - Folder thuộc workspace cá nhân → chỉ chủ sở hữu
+ *  - Phase 2: Thêm ACL riêng cho folder
+ */
+export async function hasFolderAccess(
+  userId: string,
+  folderId: string,
+  action: 'view' | 'upload' | 'edit' | 'delete'
+): Promise<boolean> {
+  // 1. Lấy thông tin folder + workspace
+  const folder = await db.selectFrom('folders')
+    .innerJoin('workspaces', 'workspaces.id', 'folders.workspace_id')
+    .leftJoin('departments', 'departments.id', 'workspaces.department_id')
+    .select([
+      'folders.id',
+      'folders.workspace_id',
+      'workspaces.type as workspace_type',
+      'workspaces.owner_user_id',
+      'workspaces.department_id'
+    ])
+    .where('folders.id', '=', folderId)
+    .where('folders.deleted_at', 'is', null)
+    .executeTakeFirst();
+
+  if (!folder) return false;
+
+  // 2. System Admin → OK tất cả
+  const isAdmin = await db.selectFrom('user_roles')
+    .innerJoin('roles', 'roles.id', 'user_roles.role_id')
+    .select('roles.key')
+    .where('user_roles.user_id', '=', userId)
+    .where('roles.key', '=', 'system_admin')
+    .where('user_roles.scope_type', '=', 'global')
+    .executeTakeFirst();
+
+  if (isAdmin) return true;
+
+  // 3. Kiểm tra theo loại workspace
+  switch (folder.workspace_type) {
+    case 'company':
+      // Phase 1: Mọi user active đều có quyền view/download
+      // Upload/edit/delete cần quyền chức năng
+      if (action === 'view') return true;
+      return await hasFunctionalPermission(userId, `resource.${action === 'upload' ? 'upload' : action === 'edit' ? 'edit' : 'delete'}`);
+
+    case 'personal':
+      // Chỉ chủ sở hữu
+      return folder.owner_user_id === userId;
+
+    case 'department':
+      // Phải là thành viên phòng ban
+      const isMember = await db.selectFrom('department_members')
+        .select('user_id')
+        .where('department_id', '=', folder.department_id)
+        .where('user_id', '=', userId)
+        .executeTakeFirst();
+      
+      if (!isMember) return false;
+      
+      // Nếu là action mạnh (upload/edit/delete), cần thêm quyền chức năng
+      if (action !== 'view') {
+        return await hasFunctionalPermission(
+          userId,
+          `resource.${action}`,
+          { type: 'department', id: folder.department_id! }
+        );
+      }
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+/**
+ * Throw 403 nếu không có quyền truy cập folder
+ */
+export async function requireFolderAccess(
+  userId: string,
+  folderId: string,
+  action: 'view' | 'upload' | 'edit' | 'delete'
+) {
+  const has = await hasFolderAccess(userId, folderId, action);
+  if (!has) {
+    throw new AppError(403, 'Bạn không có quyền truy cập thư mục này');
+  }
+}
+export function accessibleResourceSql(userId: string) {
+  return sql<boolean>`EXISTS (
+    SELECT 1 FROM folders f
+    JOIN workspaces w ON w.id = f.workspace_id
+    WHERE f.id = resources.folder_id
+      AND f.deleted_at IS NULL AND w.deleted_at IS NULL
+      AND (
+        w.type = 'company'
+        OR (w.type = 'personal' AND w.owner_user_id = ${userId})
+        OR (w.type = 'department' AND EXISTS (
+              SELECT 1 FROM department_members dm
+              WHERE dm.department_id = w.department_id AND dm.user_id = ${userId}))
+        OR EXISTS (
+              SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id
+              WHERE ur.user_id = ${userId} AND r.key = 'system_admin' AND ur.scope_type = 'global')
+      )
+  )`;
+}
+</file>
+
+<file path="src/app.ts">
+import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import path from 'path';
+import crypto from 'crypto';
+
+import { env } from './config/env.js';
+import { initStorageDriver } from './shared/storage/storage.factory.js';
+import { errorHandler } from './shared/middlewares/error.middleware.js';
+import type { AuthRequest } from './shared/middlewares/auth.middleware.js';
+import { authenticate } from './shared/middlewares/auth.middleware.js';
+import { apiLimiter, loginLimiter } from './shared/middlewares/rateLimit.middleware.js';
+
+import { AuthController } from './modules/auth/auth.controller.js';
+import { UserController } from './modules/users/user.controller.js';
+import { MeController } from './modules/users/me.controller.js';
+import { DepartmentController } from './modules/departments/department.controller.js';
+import { PositionController } from './modules/positions/position.controller.js';
+import { ResourceController } from './modules/resources/resource.controller.js';
+import { FolderController } from './modules/folders/folder.controller.js';
+import { SearchController } from './modules/search/search.controller.js';
+import { InvitationController } from './modules/invitations/invitation.controller.js';
+import { DashboardController } from './modules/dashboard/dashboard.controller.js';
+import { RolesController } from './modules/roles/roles.controller.js';
+import { AuditController } from './modules/audit/audit.controller.js';
+import { SettingsController } from './modules/system-settings/settings.controller.js';
+import { healthCheck } from './modules/health/health.controller.js';
+
+const app = express();
+initStorageDriver(env.STORAGE_DRIVER);
+
+app.use(helmet());
+app.use(cors({
+  origin: env.FRONTEND_URL || '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+}));
+app.set('trust proxy', 1);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const requestId = (req.headers['x-request-id'] as string) || crypto.randomUUID();
+  req.headers['x-request-id'] = requestId;
+  res.setHeader('X-Request-Id', requestId);
+  (req as any).requestId = requestId;
+  next();
+});
+
+app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use('/api', apiLimiter);
+
+if (env.STORAGE_DRIVER === 'local') {
+  app.use(env.STORAGE_PUBLIC_URL, express.static(path.resolve(env.STORAGE_LOCAL_PATH), {
+    dotfiles: 'deny', index: false, maxAge: '1h',
+  }));
+}
+
+const authController = new AuthController();
+const userController = new UserController();
+const meController = new MeController();
+const departmentController = new DepartmentController();
+const positionController = new PositionController();
+const resourceController = new ResourceController();
+const folderController = new FolderController();
+const searchController = new SearchController();
+const invitationController = new InvitationController();
+const dashboardController = new DashboardController();
+const rolesController = new RolesController();
+const auditController = new AuditController();
+const settingsController = new SettingsController();
+
+// ---------- PUBLIC ----------
+app.get('/health', healthCheck);
+app.get('/', (_req, res) => res.json({ success: true, message: 'CRMS API is running', version: '1.0.0' }));
+
+app.post('/api/v1/auth/login', loginLimiter, ...(authController.login as any));
+app.post('/api/v1/auth/refresh-token', ...(authController.refreshToken as any));
+app.post('/api/v1/auth/forgot-password', ...(authController.forgotPassword as any));
+app.post('/api/v1/auth/reset-password', ...(authController.resetPassword as any));
+app.post('/api/v1/invitations/accept', ...(invitationController.accept as any));
+app.get('/api/v1/settings/public', ...(settingsController.getPublic as any));
+
+// ---------- PROTECTED ----------
+app.post('/api/v1/auth/logout', authenticate, ...(authController.logout as any));
+app.post('/api/v1/auth/change-password', authenticate, ...(authController.changePassword as any));
+app.post('/api/v1/auth/logout-all-devices', authenticate, ...(authController.logoutAllDevices as any));
+
+app.get('/api/v1/me', authenticate, meController.getProfile.bind(meController));
+app.delete('/api/v1/me/sessions/:sessionId', authenticate, meController.revokeSession.bind(meController));
+
+app.get('/api/v1/users', authenticate, ...(userController.list as any));
+app.get('/api/v1/users/:userId', authenticate, ...(userController.getById as any));
+app.post('/api/v1/users', authenticate, ...(userController.create as any));
+app.put('/api/v1/users/:userId', authenticate, ...(userController.update as any));
+app.delete('/api/v1/users/:userId', authenticate, ...(userController.delete as any));
+app.put('/api/v1/users/:userId/roles', authenticate, ...(userController.updateRoles as any)); // MỚI
+
+app.get('/api/v1/departments', authenticate, ...(departmentController.list as any));
+app.get('/api/v1/departments/tree', authenticate, ...(departmentController.tree as any));
+app.get('/api/v1/departments/:departmentId', authenticate, ...(departmentController.getById as any));
+app.post('/api/v1/departments', authenticate, ...(departmentController.create as any));
+app.put('/api/v1/departments/:departmentId', authenticate, ...(departmentController.update as any));
+app.delete('/api/v1/departments/:departmentId', authenticate, ...(departmentController.delete as any));
+app.post('/api/v1/departments/:departmentId/members', authenticate, ...(departmentController.addMember as any));
+app.put('/api/v1/departments/:departmentId/members/:userId', authenticate, ...(departmentController.updateMemberRole as any));
+app.delete('/api/v1/departments/:departmentId/members/:userId', authenticate, ...(departmentController.removeMember as any));
+
+app.get('/api/v1/positions', authenticate, ...(positionController.list as any));
+app.get('/api/v1/positions/:positionId', authenticate, ...(positionController.getById as any));
+app.post('/api/v1/positions', authenticate, ...(positionController.create as any));
+app.put('/api/v1/positions/:positionId', authenticate, ...(positionController.update as any));
+app.delete('/api/v1/positions/:positionId', authenticate, ...(positionController.delete as any));
+
+app.get('/api/v1/roles', authenticate, rolesController.list.bind(rolesController));
+
+// Resources: /trash TRƯỚC /:resourceId
+app.get('/api/v1/resources', authenticate, ...(resourceController.list as any));
+app.get('/api/v1/resources/trash', authenticate, ...(resourceController.listTrash as any));
+app.post('/api/v1/resources/upload', authenticate, ...(resourceController.upload as any));
+app.get('/api/v1/resources/:resourceId', authenticate, ...(resourceController.getDetail as any));
+app.get('/api/v1/resources/:resourceId/download', authenticate, resourceController.download.bind(resourceController));
+app.post('/api/v1/resources/:resourceId/trash', authenticate, ...(resourceController.moveToTrash as any));
+app.post('/api/v1/resources/:resourceId/restore', authenticate, ...(resourceController.restoreFromTrash as any));
+app.delete('/api/v1/resources/:resourceId/permanent', authenticate, ...(resourceController.permanentDelete as any));
+
+app.get('/api/v1/workspaces/:workspaceId/folders', authenticate, folderController.getTree.bind(folderController));
+app.post('/api/v1/folders', authenticate, folderController.create.bind(folderController));
+
+app.get('/api/v1/dashboard/stats', authenticate, ...(dashboardController.getStats as any));
+app.get('/api/v1/dashboard/activity', authenticate, ...(dashboardController.getRecentActivity as any));
+app.get('/api/v1/dashboard/storage-trend', authenticate, ...(dashboardController.getStorageTrend as any));
+
+app.get('/api/v1/search', authenticate, ...(searchController.search as any));
+app.get('/api/v1/search/suggestions', authenticate, ...(searchController.suggestions as any));
+app.get('/api/v1/search/recent', authenticate, ...(searchController.recent as any));
+app.post('/api/v1/search/advanced', authenticate, ...(searchController.advancedSearch as any));
+
+app.get('/api/v1/invitations', authenticate, ...(invitationController.list as any));
+app.post('/api/v1/invitations', authenticate, ...(invitationController.create as any));
+app.post('/api/v1/invitations/:invitationId/revoke', authenticate, ...(invitationController.revoke as any));
+
+app.get('/api/v1/audit-logs', authenticate, ...(auditController.list as any));
+app.get('/api/v1/audit-logs/export', authenticate, ...(auditController.exportCsv as any)); // MỚI
+
+app.get('/api/v1/settings', authenticate, ...(settingsController.getAll as any));
+app.get('/api/v1/settings/:key', authenticate, ...(settingsController.getByKey as any));
+app.put('/api/v1/settings', authenticate, ...(settingsController.update as any));
+
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ success: false, error: { message: `Route ${req.method} ${req.originalUrl} not found` } });
+});
+app.use(errorHandler);
+
+export default app;
+</file>
+
+<file path="src/server.ts">
+import app from './app.js';
+import {env} from './config/env.js';
+
+import {db} from './config/database.js';
+
+
+const PORT = env.PORT;
+
+// Test kết nối DB trước khi khởi động server
+db.selectFrom('users').select('id').limit(1).execute()
+  .then(async () => {
+    const server = app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`💾 Storage Driver: ${env.STORAGE_DRIVER}`);
+    });
+
+    // Graceful shutdown
+    const shutdown = async (signal: string) => {
+      console.log(`\n${signal} received. Shutting down gracefully...`);
+      server.close(async () => {
+        console.log('HTTP server closed');
+        await db.destroy();
+        console.log('Database connections closed');
+        process.exit(0);
+      });
+
+      // Force shutdown after 10s
+      setTimeout(() => {
+        console.error('Could not close connections in time, forcefully shutting down');
+        process.exit(1);
+      }, 10000);
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+  })
+  .catch((err) => {
+    console.error('❌ Failed to connect to database:', err);
+    process.exit(1);
+  });
+</file>
+
+<file path="package.json">
+{
+  "name": "filemanager",
+  "version": "1.0.0",
+  "description": "Với quy mô công ty vừa, mình nghĩ bạn nên thiết kế hệ thống này theo hướng **Company Resource Management System (CRMS)** – một nền tảng quản lý, lưu trữ, chia sẻ và kiểm soát quyền truy cập tài nguyên nội bộ của công ty.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/server.js",
+    "db:codegen": "kysely-codegen --out-file src/db/types.tsx",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "file-type": "^22.3.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "kysely": "^0.29.9",
+    "morgan": "^1.12.1",
+    "multer": "^2.5.0",
+    "nodemailer": "^10.6.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "kysely-codegen": "^0.20.0",
+    "node-pg-migrate": "^9.0.0",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
+</file>
+
+<file path="tsc_output.txt">
+error TS5112: tsconfig.json is present but will not be loaded if files are specified on commandline. Use '--ignoreConfig' to skip this error.
+</file>
+
+<file path="tsconfig.json">
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Environment Settings
+    // See also https://aka.ms/tsconfig/module
+    "module": "nodenext",
+    "target": "esnext",
+    "types": [],
+    "allowImportingTsExtensions": true,
+    // For nodejs:
+    // "lib": ["esnext"],
+    // "types": ["node"],
+    // and npm install -D @types/node
+
+    // Other Outputs
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Style Options
+    // "noImplicitReturns": true,
+    // "noImplicitOverride": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true,
+
+    // Recommended Options
+    "strict": true,
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+  }
+}
+</file>
+
+</files>
